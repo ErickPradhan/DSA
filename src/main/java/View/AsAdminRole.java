@@ -92,7 +92,7 @@ public class AsAdminRole extends javax.swing.JFrame {
                     loginAttempts = 0;
                     isLocked = false;
                     JOptionPane.showMessageDialog(this,"Admin Login Successful!");
-                    new Dashboard().setVisible(true);
+                    new AdminInterface().setVisible(true);
                     dispose();
                     break;
 
@@ -270,7 +270,7 @@ public class AsAdminRole extends javax.swing.JFrame {
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Iceberg", 1, 24)); // NOI18N
 
-        jPanel1.setBackground(new java.awt.Color(71, 71, 71));
+        jPanel1.setBackground(new java.awt.Color(53, 54, 55));
         jPanel1.setFont(new java.awt.Font("Iceberg", 0, 48)); // NOI18N
 
         jPanel2.setBackground(new java.awt.Color(21, 20, 20));

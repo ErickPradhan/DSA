@@ -20,7 +20,8 @@ public class Main extends javax.swing.JFrame {
     /**
      * Creates new form RoleSelectionFrame
      */
-    public Main() {
+    public Main() 
+    {
         initComponents();
         setLocationRelativeTo(null);   //Centers window
         //Admin Logo Button
@@ -39,8 +40,6 @@ public class Main extends javax.swing.JFrame {
         jLoginButtonUser.setHorizontalTextPosition(SwingConstants.CENTER);
         jLoginButtonUser.setVerticalTextPosition(SwingConstants.BOTTOM);
         jLoginButtonUser.setIconTextGap(5);
-
-
     }
     
     //Components
@@ -77,6 +76,8 @@ public class Main extends javax.swing.JFrame {
         public RoundedButton(String text) 
         {
             super(text);
+            setOpaque(false);
+            setContentAreaFilled(false);
             setBackground(normalColor);
             setForeground(Color.WHITE);
             setFocusPainted(false);
@@ -87,28 +88,93 @@ public class Main extends javax.swing.JFrame {
         }
 
         @Override
-        protected void paintComponent(Graphics g) 
+        protected void paintComponent(Graphics g)
         {
             Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Change color based on state
+            // Choose color based on state
             if (getModel().isArmed()) {
-                g2.setColor(pressColor);     // When clicking
-            } 
+                g2.setColor(pressColor);
+            }
             else if (getModel().isRollover()) {
-                g2.setColor(hoverColor);     // Hover effect
-            } 
+                g2.setColor(hoverColor);
+            }
             else {
-                g2.setColor(getBackground()); // Normal
+                g2.setColor(normalColor);
             }
 
+            // Draw rounded background FIRST
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
             g2.dispose();
 
+            // NOW draw text + icon on top
+            super.paintComponent(g);
+        }
+
+    }
+    public class GradientPanel extends JPanel
+    {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            GradientPaint gradient = new GradientPaint(
+                    0, 0, Color.decode("#353637"),
+                    0, getHeight(), Color.decode("#111214")
+            );
+
+            g2.setPaint(gradient);
+            g2.fillRect(0, 0, getWidth(), getHeight());
+        }
+    }
+    public class RoundedGradientPanelDark extends JPanel 
+    {
+        private int radius = 30;
+
+        public RoundedGradientPanelDark(int radius) {
+            this.radius = radius;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Gradient background
+            GradientPaint gradient = new GradientPaint(
+                    0, 0, Color.decode("#23262A"),
+                    0, getHeight(), Color.decode("#0E141C")
+            );
+
+            g2.setPaint(gradient);
+
+            // Rounded shape
+            g2.fill(new RoundRectangle2D.Float(
+                    0, 0,
+                    getWidth(), getHeight(),
+                    radius, radius
+            ));
+
+            g2.dispose();
+
+            // 👉 Paint children AFTER background so buttons are visible
             super.paintComponent(g);
         }
     }
+
+
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -118,9 +184,9 @@ public class Main extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
+        jPanel1 = new GradientPanel();
         jLabel1 = new javax.swing.JLabel();
-        jPanel2 = new RoundedPanel(30);
+        jPanel2 = new RoundedGradientPanelDark(30);
         jLabel2 = new javax.swing.JLabel();
         jLoginButtonAdmin = new RoundedButton("Button Text") ;
         jLoginButtonUser = new RoundedButton("Button Text") ;
@@ -129,7 +195,7 @@ public class Main extends javax.swing.JFrame {
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setFont(new java.awt.Font("Iceberg", 1, 24)); // NOI18N
 
-        jPanel1.setBackground(new java.awt.Color(71, 71, 71));
+        jPanel1.setBackground(new java.awt.Color(53, 54, 55));
         jPanel1.setFont(new java.awt.Font("Iceberg", 0, 48)); // NOI18N
 
         jLabel1.setFont(new java.awt.Font("Iceberg", 0, 24)); // NOI18N
@@ -144,14 +210,14 @@ public class Main extends javax.swing.JFrame {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Select Your Role");
 
-        jLoginButtonAdmin.setBackground(new java.awt.Color(71, 71, 71));
+        jLoginButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
         jLoginButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
         jLoginButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
         jLoginButtonAdmin.setText("Admin");
         jLoginButtonAdmin.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jLoginButtonAdmin.addActionListener(this::jLoginButtonAdminActionPerformed);
 
-        jLoginButtonUser.setBackground(new java.awt.Color(71, 71, 71));
+        jLoginButtonUser.setBackground(new java.awt.Color(53, 54, 55));
         jLoginButtonUser.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
         jLoginButtonUser.setForeground(new java.awt.Color(170, 170, 170));
         jLoginButtonUser.setText("User");
