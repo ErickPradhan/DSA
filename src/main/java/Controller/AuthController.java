@@ -12,30 +12,42 @@ import Model.User;
  */
 public class AuthController 
 {
-    // Hardcoded admin (allowed for coursework)
-    private static final User ADMIN =
-            new User("admin", "admin123", "admin");
-    
-    // Hardcoded user
-    private static final User USER =
-            new User("user", "user123", "user");
-
-    public static boolean login(String username, String password, String role) 
+    public static String login(String username, String password, String role)
     {
-
-        if (role.equals("admin")) 
+        if(role.equalsIgnoreCase("admin"))
         {
-            return username.equals(ADMIN.getUsername())
-                    && password.equals(ADMIN.getPassword());
+            boolean correctUser = username.equalsIgnoreCase("admin");
+            boolean correctPass = password.equals("admin123");
+
+            if(correctUser && correctPass)
+                return "SUCCESS";
+
+            if(!correctUser && !correctPass)
+                return "BOTH_WRONG";
+
+            if(!correctUser)
+                return "WRONG_USERNAME";
+
+            return "WRONG_PASSWORD";
         }
 
-        // Simple user login logic
-        if (role.equals("user")) 
+        if(role.equalsIgnoreCase("user"))
         {
-            return username.equals(USER.getUsername())
-                    && password.equals(USER.getPassword());
+            boolean correctUser = username.equalsIgnoreCase("user");
+            boolean correctPass = password.equals("user123");
+
+            if(correctUser && correctPass)
+                return "SUCCESS";
+
+            if(!correctUser && !correctPass)
+                return "BOTH_WRONG";
+
+            if(!correctUser)
+                return "WRONG_USERNAME";
+
+            return "WRONG_PASSWORD";
         }
 
-        return false;
+        return "BOTH_WRONG";
     }
 }

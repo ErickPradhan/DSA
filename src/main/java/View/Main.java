@@ -22,6 +22,7 @@ public class Main extends javax.swing.JFrame {
      */
     public Main() {
         initComponents();
+        setLocationRelativeTo(null);   //Centers window
     }
     
     //Components
@@ -53,7 +54,7 @@ public class Main extends javax.swing.JFrame {
         final int radius = 30;
         final Color normalColor = new Color(30,30,30);
         final Color hoverColor = new Color(50,50,50);
-        final Color pressColor = new Color(20,20,20);
+        final Color pressColor = new Color(30,30,30);
 
         public RoundedButton(String text) 
         {

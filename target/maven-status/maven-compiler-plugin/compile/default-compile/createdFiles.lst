@@ -1,5 +1,6 @@
 View\UserDashboard.class
 View\AsAdminRole$RoundedButton.class
+View\AsUserRole$1.class
 View\Main.class
 View\AsAdminRole$RoundedPanel.class
 View\Dashboard.class
@@ -7,6 +8,7 @@ Model\User.class
 Controller\AuthController.class
 View\Main$RoundedButton.class
 View\AsUserRole$RoundedButton.class
+View\AsAdminRole$1.class
 View\AsUserRole$RoundedPanel.class
 View\Main$RoundedPanel.class
 View\AsAdminRole.class

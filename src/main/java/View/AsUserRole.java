@@ -18,36 +18,166 @@ public class AsUserRole extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsUserRole.class.getName());
 
+    private int loginAttempts = 0;
+    private boolean isLocked = false;
     /**
      * Creates new form RoleSelectionFrame
      */
-    public AsUserRole() {
+    public AsUserRole() 
+    {
         initComponents();
-        
-        //Action Listener
-        jLoginButtonUser.addActionListener(e -> 
+        setLocationRelativeTo(null);   //Centers window
+        //Iceberg Font
+        try 
         {
-
-            boolean success = AuthController.login
+            Font iceberg = Font.createFont
             (
-                jUsernameTextFieldUser.getText(),
-                jPasswordTextFieldUser.getText(),
-                "user"
-            );
+                Font.TRUETYPE_FONT,
+                getClass().getResourceAsStream("/fonts/Iceberg-Regular.ttf")
+            ).deriveFont(Font.PLAIN, 16f);
 
-            if(success)
+            UIManager.put("OptionPane.messageFont", iceberg);
+            UIManager.put("OptionPane.buttonFont", iceberg);
+
+        } 
+        catch (Exception ex) 
+        {
+            Font fallback = new Font("Arial", Font.PLAIN, 16);
+            UIManager.put("OptionPane.messageFont", fallback);
+            UIManager.put("OptionPane.buttonFont", fallback);
+        }
+        
+        // Makes ENTER key trigger Login button
+        getRootPane().setDefaultButton(jLoginButtonUser);
+
+        jUsernameTextFieldUser.requestFocusInWindow();
+
+        jUsernameTextFieldUser.addActionListener(e -> jLoginButtonUser.doClick());
+        jPasswordTextFieldUser.addActionListener(e -> jLoginButtonUser.doClick());
+
+    
+        //Action Listener
+        jLoginButtonUser.addActionListener(e ->
+        {
+            String user = jUsernameTextFieldUser.getText().trim();
+            String pass = new String(jPasswordTextFieldUser.getPassword()).trim();
+
+            // === EMPTY FIELD VALIDATION ===
+            if(user.isEmpty() && pass.isEmpty())
             {
-                JOptionPane.showMessageDialog(this,"User Login Successful");
-                new Dashboard().setVisible(true); //Dashboard Opens:
-                dispose();
+                JOptionPane.showMessageDialog(this,
+                        "Please enter your Username and Password!");
+                return;
             }
-            else
+
+            if(user.isEmpty())
             {
-                JOptionPane.showMessageDialog(this,"Invalid User Credentials");
+                JOptionPane.showMessageDialog(this,
+                        "Please enter your Username!");
+                return;
+            }
+
+            if(pass.isEmpty())
+            {
+                JOptionPane.showMessageDialog(this,
+                        "Please enter your Password!");
+                return;
+            }
+            String result = AuthController.login(user, pass, "user");
+
+            switch (result)
+            {
+                case "SUCCESS":
+                    loginAttempts = 0;
+                    isLocked = false;
+                    JOptionPane.showMessageDialog(this,"User Login Successful!");
+                    new Dashboard().setVisible(true);
+                    dispose();
+                    break;
+
+                case "WRONG_USERNAME":
+                    JOptionPane.showMessageDialog(this,"Invalid User's Username!");
+                    loginAttempts++;
+                    checkAttempts();
+                    break;
+
+                case "WRONG_PASSWORD":
+                    JOptionPane.showMessageDialog(this,"Your password is incorrect, Please try again!");
+                    loginAttempts++;
+                    checkAttempts();
+                    break;
+
+                case "BOTH_WRONG":
+                    JOptionPane.showMessageDialog(this,"Invalid credentials, Please try again!");
+                    loginAttempts++;
+                    checkAttempts();
+                    break;
             }
         });
     }
-    
+    private void checkAttempts()
+    {
+        if(loginAttempts < 5 || isLocked)
+            return;
+
+        isLocked = true;
+        jLoginButtonUser.setEnabled(false);
+
+        int lockSeconds = 30;
+
+        final JDialog dialog = new JDialog(this, "Login Locked", true);
+
+        JPanel panel = new JPanel(new BorderLayout(10,10));
+
+        Icon errorIcon = UIManager.getIcon("OptionPane.errorIcon");
+
+        JLabel label = new JLabel(
+                "Too many attempts! Please wait " + lockSeconds + " seconds!",
+                errorIcon,
+                SwingConstants.LEFT
+        ); 
+        //Iceberg Font:
+        try {
+            Font iceberg = Font.createFont(
+                    Font.TRUETYPE_FONT,
+                    getClass().getResourceAsStream("/fonts/Iceberg-Regular.ttf")
+            );
+            iceberg = iceberg.deriveFont(Font.PLAIN, 16f);
+            label.setFont(iceberg);
+        } catch (Exception ex) {
+            label.setFont(new Font("Arial", Font.PLAIN, 16)); // fallback
+        }
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+
+        panel.add(label, BorderLayout.CENTER);
+
+        dialog.add(panel);
+        dialog.pack();                 // auto fits content
+        dialog.setSize(385, 150);
+        dialog.setLocationRelativeTo(this);
+
+
+        // Timer for countdown
+        new javax.swing.Timer(1000, new java.awt.event.ActionListener() {
+            int timeLeft = lockSeconds;
+
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                timeLeft--;
+                label.setText("Too many attempts! Please wait " + timeLeft + " seconds.");
+
+                if(timeLeft <= 0){
+                    ((javax.swing.Timer)e.getSource()).stop();
+                    dialog.dispose();
+                    jLoginButtonUser.setEnabled(true);
+                    loginAttempts = 0;
+                    isLocked = false;
+                }
+            }
+        }).start();
+
+        dialog.setVisible(true);
+    }
     
     //Components
     public class RoundedPanel extends JPanel 
@@ -131,7 +261,7 @@ public class AsUserRole extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jUsernameTextFieldUser = new javax.swing.JTextField();
         jPanel4 = new javax.swing.JPanel();
-        jPasswordTextFieldUser = new javax.swing.JTextField();
+        jPasswordTextFieldUser = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -179,7 +309,6 @@ public class AsUserRole extends javax.swing.JFrame {
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Password", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jPasswordTextFieldUser.setBackground(new java.awt.Color(21, 20, 20));
-        jPasswordTextFieldUser.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
         jPasswordTextFieldUser.setForeground(new java.awt.Color(170, 170, 170));
         jPasswordTextFieldUser.setBorder(null);
 
@@ -187,15 +316,11 @@ public class AsUserRole extends javax.swing.JFrame {
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -304,7 +429,7 @@ public class AsUserRole extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JTextField jPasswordTextFieldUser;
+    private javax.swing.JPasswordField jPasswordTextFieldUser;
     private javax.swing.JTextField jUsernameTextFieldUser;
     // End of variables declaration//GEN-END:variables
 }
