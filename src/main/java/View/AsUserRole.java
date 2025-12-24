@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package View;
+import Controller.AuthController;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.RenderingHints;
@@ -22,7 +23,31 @@ public class AsUserRole extends javax.swing.JFrame {
      */
     public AsUserRole() {
         initComponents();
+        
+        //Action Listener
+        jLoginButtonUser.addActionListener(e -> 
+        {
+
+            boolean success = AuthController.login
+            (
+                jUsernameTextFieldUser.getText(),
+                jPasswordTextFieldUser.getText(),
+                "user"
+            );
+
+            if(success)
+            {
+                JOptionPane.showMessageDialog(this,"User Login Successful");
+                new Dashboard().setVisible(true); //Dashboard Opens:
+                dispose();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(this,"Invalid User Credentials");
+            }
+        });
     }
+    
     
     //Components
     public class RoundedPanel extends JPanel 
@@ -102,11 +127,11 @@ public class AsUserRole extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new RoundedPanel(30);
         jLabel2 = new javax.swing.JLabel();
-        jButton2 = new RoundedButton("Button Text") ;
+        jLoginButtonUser = new RoundedButton("Button Text") ;
         jPanel3 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        jUsernameTextFieldUser = new javax.swing.JTextField();
         jPanel4 = new javax.swing.JPanel();
-        jTextField2 = new javax.swing.JTextField();
+        jPasswordTextFieldUser = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -122,54 +147,54 @@ public class AsUserRole extends javax.swing.JFrame {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Login as User");
 
-        jButton2.setBackground(new java.awt.Color(71, 71, 71));
-        jButton2.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(170, 170, 170));
-        jButton2.setText("Login");
-        jButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton2.addActionListener(this::jButton2ActionPerformed);
+        jLoginButtonUser.setBackground(new java.awt.Color(71, 71, 71));
+        jLoginButtonUser.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jLoginButtonUser.setForeground(new java.awt.Color(170, 170, 170));
+        jLoginButtonUser.setText("Login");
+        jLoginButtonUser.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLoginButtonUser.addActionListener(this::jLoginButtonUserActionPerformed);
 
         jPanel3.setBackground(new java.awt.Color(21, 20, 20));
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Username", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
 
-        jTextField1.setBackground(new java.awt.Color(21, 20, 20));
-        jTextField1.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jTextField1.setForeground(new java.awt.Color(170, 170, 170));
-        jTextField1.setBorder(null);
-        jTextField1.setPreferredSize(new java.awt.Dimension(65, 15));
-        jTextField1.addActionListener(this::jTextField1ActionPerformed);
+        jUsernameTextFieldUser.setBackground(new java.awt.Color(21, 20, 20));
+        jUsernameTextFieldUser.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jUsernameTextFieldUser.setForeground(new java.awt.Color(170, 170, 170));
+        jUsernameTextFieldUser.setBorder(null);
+        jUsernameTextFieldUser.setPreferredSize(new java.awt.Dimension(65, 15));
+        jUsernameTextFieldUser.addActionListener(this::jUsernameTextFieldUserActionPerformed);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+            .addComponent(jUsernameTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+            .addComponent(jUsernameTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
         );
 
         jPanel4.setBackground(new java.awt.Color(21, 20, 20));
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Password", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
 
-        jTextField2.setBackground(new java.awt.Color(21, 20, 20));
-        jTextField2.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
-        jTextField2.setForeground(new java.awt.Color(170, 170, 170));
-        jTextField2.setBorder(null);
+        jPasswordTextFieldUser.setBackground(new java.awt.Color(21, 20, 20));
+        jPasswordTextFieldUser.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jPasswordTextFieldUser.setForeground(new java.awt.Color(170, 170, 170));
+        jPasswordTextFieldUser.setBorder(null);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -191,7 +216,7 @@ public class AsUserRole extends javax.swing.JFrame {
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLoginButtonUser, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(98, 98, 98))
         );
         jPanel2Layout.setVerticalGroup(
@@ -204,7 +229,7 @@ public class AsUserRole extends javax.swing.JFrame {
                 .addGap(29, 29, 29)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(38, 38, 38)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLoginButtonUser, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30))
         );
 
@@ -239,15 +264,13 @@ public class AsUserRole extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-    UserDashboard dash = new UserDashboard();
-    dash.setVisible(true);
-    this.dispose();   // closes current frame (optional)
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void jLoginButtonUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonUserActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_jLoginButtonUserActionPerformed
+
+    private void jUsernameTextFieldUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUsernameTextFieldUserActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_jUsernameTextFieldUserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -275,13 +298,13 @@ public class AsUserRole extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JButton jLoginButtonUser;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jPasswordTextFieldUser;
+    private javax.swing.JTextField jUsernameTextFieldUser;
     // End of variables declaration//GEN-END:variables
 }

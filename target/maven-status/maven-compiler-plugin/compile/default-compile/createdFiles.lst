@@ -1,0 +1,13 @@
+View\UserDashboard.class
+View\AsAdminRole$RoundedButton.class
+View\Main.class
+View\AsAdminRole$RoundedPanel.class
+View\Dashboard.class
+Model\User.class
+Controller\AuthController.class
+View\Main$RoundedButton.class
+View\AsUserRole$RoundedButton.class
+View\AsUserRole$RoundedPanel.class
+View\Main$RoundedPanel.class
+View\AsAdminRole.class
+View\AsUserRole.class
