@@ -23,6 +23,24 @@ public class Main extends javax.swing.JFrame {
     public Main() {
         initComponents();
         setLocationRelativeTo(null);   //Centers window
+        //Admin Logo Button
+        ImageIcon adminIcon = new ImageIcon(getClass().getResource("/logo/AdminLogo.png"));
+        Image adminImg = adminIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+        jLoginButtonAdmin.setIcon(new ImageIcon(adminImg));
+
+        jLoginButtonAdmin.setHorizontalTextPosition(SwingConstants.CENTER);
+        jLoginButtonAdmin.setVerticalTextPosition(SwingConstants.BOTTOM);
+        jLoginButtonAdmin.setIconTextGap(5);
+        //User Logo Button
+        ImageIcon userIcon = new ImageIcon(getClass().getResource("/logo/UserLogo.png"));
+        Image userImg = userIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+        jLoginButtonUser.setIcon(new ImageIcon(userImg));
+
+        jLoginButtonUser.setHorizontalTextPosition(SwingConstants.CENTER);
+        jLoginButtonUser.setVerticalTextPosition(SwingConstants.BOTTOM);
+        jLoginButtonUser.setIconTextGap(5);
+
+
     }
     
     //Components
@@ -104,8 +122,8 @@ public class Main extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new RoundedPanel(30);
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new RoundedButton("Button Text") ;
-        jButton2 = new RoundedButton("Button Text") ;
+        jLoginButtonAdmin = new RoundedButton("Button Text") ;
+        jLoginButtonUser = new RoundedButton("Button Text") ;
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -126,19 +144,19 @@ public class Main extends javax.swing.JFrame {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Select Your Role");
 
-        jButton1.setBackground(new java.awt.Color(71, 71, 71));
-        jButton1.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(170, 170, 170));
-        jButton1.setText("Admin");
-        jButton1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton1.addActionListener(this::jButton1ActionPerformed);
+        jLoginButtonAdmin.setBackground(new java.awt.Color(71, 71, 71));
+        jLoginButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jLoginButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jLoginButtonAdmin.setText("Admin");
+        jLoginButtonAdmin.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLoginButtonAdmin.addActionListener(this::jLoginButtonAdminActionPerformed);
 
-        jButton2.setBackground(new java.awt.Color(71, 71, 71));
-        jButton2.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(170, 170, 170));
-        jButton2.setText("User");
-        jButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton2.addActionListener(this::jButton2ActionPerformed);
+        jLoginButtonUser.setBackground(new java.awt.Color(71, 71, 71));
+        jLoginButtonUser.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jLoginButtonUser.setForeground(new java.awt.Color(170, 170, 170));
+        jLoginButtonUser.setText("User");
+        jLoginButtonUser.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLoginButtonUser.addActionListener(this::jLoginButtonUserActionPerformed);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -146,9 +164,9 @@ public class Main extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(27, 27, 27)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLoginButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLoginButtonUser, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(25, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
@@ -160,8 +178,8 @@ public class Main extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(24, 24, 24)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE))
+                    .addComponent(jLoginButtonUser, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
+                    .addComponent(jLoginButtonAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel2)
                 .addGap(15, 15, 15))
@@ -204,18 +222,18 @@ public class Main extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jLoginButtonAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonAdminActionPerformed
     AsAdminRole admin = new AsAdminRole();
     admin.setVisible(true);
     this.dispose();   // closes current frame (optional)
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jLoginButtonAdminActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void jLoginButtonUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonUserActionPerformed
     AsUserRole user = new AsUserRole();
     user.setVisible(true);
     this.dispose();   // optional: closes current window
 
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_jLoginButtonUserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -243,10 +261,10 @@ public class Main extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JButton jLoginButtonAdmin;
+    private javax.swing.JButton jLoginButtonUser;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
