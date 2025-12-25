@@ -10,6 +10,7 @@ Controller\AuthController.class
 View\AdminInterface$1.class
 View\AsAdminRole$1.class
 View\AsUserRole$RoundedPanel.class
+View\AdminInterface$GradientPanelSoft.class
 View\AdminInterface.class
 View\AsAdminRole.class
 View\AsUserRole.class
