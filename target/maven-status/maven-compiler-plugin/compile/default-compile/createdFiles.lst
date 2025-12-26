@@ -1,3 +1,4 @@
+Controller\ExpenseRepository.class
 View\AdminInterface$RoundedPanel.class
 View\AdminInterface$GradientPanel.class
 View\AsAdminRole$RoundedButton.class
@@ -17,6 +18,7 @@ View\AsUserRole.class
 Controller\ExpenseController.class
 View\UserDashboard.class
 View\AdminInterface$RoundedButton.class
+Controller\ExpenseSortController.class
 Model\User.class
 View\Main$RoundedButton.class
 View\AsUserRole$RoundedButton.class

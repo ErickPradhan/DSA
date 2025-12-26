@@ -4,7 +4,7 @@
  */
 package View;
 import Model.ExpenseModel;
-import Controller.ExpenseController;
+import Controller.ExpenseSortController;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.Color;
@@ -14,14 +14,14 @@ import java.awt.GradientPaint;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
-import java.util.ArrayList;
-import javax.swing.table.DefaultTableModel;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Queue;
+import Controller.ExpenseRepository;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class AdminInterface extends javax.swing.JFrame {
-    ArrayList<ExpenseModel> ExpenseList = new  ArrayList<>();
     Queue<ExpenseModel> addQueue = new LinkedList<>();
     Stack<ExpenseModel> deleteStack = new Stack<>();
     private ExpenseModel updatingRecord;
@@ -34,89 +34,35 @@ public class AdminInterface extends javax.swing.JFrame {
 
     public AdminInterface() {
         initComponents();
-        loadFromCSV();
+        
+        jDashboardTableAdmin.setFillsViewportHeight(true);
+        jScrollPane1.getViewport().setBackground(new Color(43,46,51));
 
-        if (ExpenseList.isEmpty()) {
-            saveToCSV();
+        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer();
+        headerRenderer.setBackground(new Color(33, 34, 35));   // header background
+        headerRenderer.setForeground(new Color(170, 170, 170)); // header text color
+        headerRenderer.setFont(new Font("Iceberg", Font.BOLD, 20)); // header font
+        headerRenderer.setHorizontalAlignment(JLabel.CENTER);
+
+        for (int i = 0; i < jDashboardTableAdmin.getColumnModel().getColumnCount(); i++) {
+            jDashboardTableAdmin.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
         }
 
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        // Optional → remove ugly white border
+        jDashboardTableAdmin.getTableHeader().setOpaque(false);
+        jDashboardTableAdmin.getTableHeader().setReorderingAllowed(false);
+
+        
+        ExpenseRepository.load();
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
+
+        
         setLocationRelativeTo(null);
         
-        jUndoButton.addActionListener(e -> undoDelete());
+        jUndoButtonAdmin.addActionListener(e -> undoDelete());
         jDeleteButton.addActionListener(e -> deleteSelectedRecord());
     }
     
-    //Method
-    private void loadFromCSV() 
-    {
-        try {
-            java.io.File file = new java.io.File("Expenses.csv");
-            if (!file.exists()) return;
-
-            java.util.Scanner sc = new java.util.Scanner(file);
-            ExpenseList.clear();
-
-            while (sc.hasNextLine()) {
-                String line = sc.nextLine();
-                String[] data = line.split(",");
-
-                if (data.length == 7) {
-                    ExpenseModel e = new ExpenseModel(
-                            Integer.parseInt(data[0].trim()),
-                            data[1].trim(),
-                            data[2].trim(),
-                            data[3].trim(),
-                            Double.parseDouble(data[4].trim()),
-                            data[5].trim(),
-                            data[6].trim()
-                    );
-                    ExpenseList.add(e);
-                }
-            }
-
-            sc.close();
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Failed to load data from CSV file.",
-                    "File Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-    }
-
-    
-    //Save to Expense.csv
-    private void saveToCSV() {
-        try {
-            java.io.PrintWriter pw = new java.io.PrintWriter("Expenses.csv");
-
-            for (ExpenseModel e : ExpenseList) {
-                pw.println(
-                        e.getId() + "," +
-                        e.getName() + "," +
-                        e.getExpenseTitle() + "," +
-                        e.getCategory() + "," +
-                        e.getAmount() + "," +
-                        e.getContact() + "," +
-                        e.getDate()
-                );
-            }
-
-            pw.close();
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Failed to save data to CSV file.",
-                    "File Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-    }
-
     
     public static void loadStudentListToTable(javax.swing.JTable table, java.util.Collection<ExpenseModel> list){
         DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -357,16 +303,14 @@ public class AdminInterface extends javax.swing.JFrame {
                 date
         );
 
-        // Add to ArrayList
-        ExpenseList.add(exp);
-        
-        //Save to file
-        saveToCSV();
+        ExpenseRepository.expenses.add(exp);
+        ExpenseRepository.save();
         
         addQueue.offer(exp);  
 
         // Refresh Dashboard Table
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        ExpenseRepository.load();
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
 
         // Success message
         JOptionPane.showMessageDialog(
@@ -411,7 +355,7 @@ public class AdminInterface extends javax.swing.JFrame {
 
         ExpenseModel target = null;
 
-        for(ExpenseModel e : ExpenseList){
+        for(ExpenseModel e : ExpenseRepository.expenses){
             if(e.getId() == id && e.getCategory().equalsIgnoreCase(category)){
                 target = e;
                 break;
@@ -446,12 +390,10 @@ public class AdminInterface extends javax.swing.JFrame {
         // Push to undo stack
         deleteStack.push(target);
 
-        // Remove record
-        ExpenseList.remove(target);
+        ExpenseRepository.expenses.remove(target);
 
-        // Save + Refresh
-        saveToCSV();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        ExpenseRepository.save();
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
 
         JOptionPane.showMessageDialog(this,
             "Record deleted successfully.",
@@ -479,7 +421,7 @@ public class AdminInterface extends javax.swing.JFrame {
 
         // --- Prevent duplicate restore ---
         boolean exists = false;
-        for (ExpenseModel e : ExpenseList) {
+        for (ExpenseModel e : ExpenseRepository.expenses) {
             if (e.getId() == restored.getId()) {
                 exists = true;
                 break;
@@ -496,14 +438,14 @@ public class AdminInterface extends javax.swing.JFrame {
             return;
         }
 
-        // --- Add back ---
-        ExpenseList.add(restored);
+        ExpenseRepository.expenses.add(restored);
 
-        // OPTIONAL: keep table naturally sorted by ID
-        ExpenseList.sort((a, b) -> Integer.compare(a.getId(), b.getId()));
+        ExpenseRepository.expenses.sort(
+            (a, b) -> Integer.compare(a.getId(), b.getId())
+        );
 
-        saveToCSV();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        ExpenseRepository.save();
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
 
         JOptionPane.showMessageDialog(
                 this,
@@ -567,7 +509,7 @@ public class AdminInterface extends javax.swing.JFrame {
         // ------- SEARCH RECORD -------
         ExpenseModel target = null;
 
-        for(ExpenseModel e : ExpenseList){
+        for(ExpenseModel e : ExpenseRepository.expenses){
             if(e.getId() == id && e.getCategory().equalsIgnoreCase(category)){
                 target = e;
                 break;
@@ -652,8 +594,8 @@ public class AdminInterface extends javax.swing.JFrame {
         updatingRecord.setContact(contact);
         updatingRecord.setDate(date);
 
-        saveToCSV();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        ExpenseRepository.save();
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
 
         JOptionPane.showMessageDialog(
                 this,
@@ -715,17 +657,20 @@ public class AdminInterface extends javax.swing.JFrame {
         jParentPanel = new javax.swing.JPanel();
         jDashboardPanelAdmin = new GradientPanelDark() ;
         jLabel4 = new javax.swing.JLabel();
-        jPanel6 = new javax.swing.JPanel();
-        jButton4 = new javax.swing.JButton();
-        jPanel7 = new javax.swing.JPanel();
-        jPanel8 = new javax.swing.JPanel();
-        jUndoButton = new javax.swing.JButton();
-        jPanel9 = new javax.swing.JPanel();
+        jPanel9 = new GradientPanelDark() ;
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jUndoButtonAdmin = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jDashboardTableAdmin = new javax.swing.JTable();
+        jDashboardTableAdmin.setFillsViewportHeight(true);
+        jAddRecordButton = new RoundedButton("Button Text")
+        ;
+        jDeleteRecordButton = new RoundedButton("Button Text")
+        ;
+        jUpdateRecord = new RoundedButton("Button Text")
+        ;
         jAddRecordPanelAdmin = new GradientPanelDark();
         jLabel6 = new javax.swing.JLabel();
         jPanel4 = new GradientPanelSoft();
@@ -892,93 +837,66 @@ public class AdminInterface extends javax.swing.JFrame {
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel4.setText("Welcome to our Dashboard!");
 
-        jButton4.setText("Add Record");
-        jButton4.addActionListener(this::jButton4ActionPerformed);
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(106, 106, 106)
-                .addComponent(jButton4)
-                .addContainerGap(118, Short.MAX_VALUE))
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                .addContainerGap(39, Short.MAX_VALUE)
-                .addComponent(jButton4)
-                .addGap(32, 32, 32))
-        );
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 287, Short.MAX_VALUE)
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-
-        jUndoButton.setText("Undo Delete");
-
-        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
-        jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addGap(93, 93, 93)
-                .addComponent(jUndoButton)
-                .addContainerGap(107, Short.MAX_VALUE))
-        );
-        jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
-                .addContainerGap(37, Short.MAX_VALUE)
-                .addComponent(jUndoButton)
-                .addGap(35, 35, 35))
-        );
-
+        jPanel9.setBackground(new java.awt.Color(21, 20, 20));
         jPanel9.setPreferredSize(new java.awt.Dimension(1005, 70));
 
+        jButton1.setBackground(new java.awt.Color(53, 54, 55));
+        jButton1.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(170, 170, 170));
         jButton1.setText("Sort By Name");
+        jButton1.setBorder(null);
         jButton1.addActionListener(this::jButton1ActionPerformed);
 
+        jButton2.setBackground(new java.awt.Color(53, 54, 55));
+        jButton2.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jButton2.setForeground(new java.awt.Color(170, 170, 170));
         jButton2.setText("Sort By Amount");
+        jButton2.setBorder(null);
         jButton2.addActionListener(this::jButton2ActionPerformed);
 
+        jButton3.setBackground(new java.awt.Color(53, 54, 55));
+        jButton3.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jButton3.setForeground(new java.awt.Color(170, 170, 170));
         jButton3.setText("Sort By ID");
+        jButton3.setBorder(null);
         jButton3.addActionListener(this::jButton3ActionPerformed);
+
+        jUndoButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
+        jUndoButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jUndoButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jUndoButtonAdmin.setText("Undo");
+        jUndoButtonAdmin.setBorder(null);
+        jUndoButtonAdmin.addActionListener(this::jUndoButtonAdminActionPerformed);
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
-                .addGap(222, 222, 222)
                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(53, 53, 53)
+                .addGap(142, 142, 142)
                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(52, 52, 52)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(119, 119, 119)
+                .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addGap(22, 22, 22)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
-                .addContainerGap(25, Short.MAX_VALUE))
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
-        jDashboardTableAdmin.setBackground(new java.awt.Color(240, 240, 240));
+        jDashboardTableAdmin.setBackground(new java.awt.Color(43, 46, 51));
         jDashboardTableAdmin.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jDashboardTableAdmin.setForeground(new java.awt.Color(170, 170, 170));
         jDashboardTableAdmin.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null},
@@ -1000,6 +918,27 @@ public class AdminInterface extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jDashboardTableAdmin);
 
+        jAddRecordButton.setBackground(new java.awt.Color(53, 54, 55));
+        jAddRecordButton.setFont(new java.awt.Font("Iceberg", 0, 24)); // NOI18N
+        jAddRecordButton.setForeground(new java.awt.Color(170, 170, 170));
+        jAddRecordButton.setText("Add Record");
+        jAddRecordButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jAddRecordButton.addActionListener(this::jAddRecordButtonActionPerformed);
+
+        jDeleteRecordButton.setBackground(new java.awt.Color(53, 54, 55));
+        jDeleteRecordButton.setFont(new java.awt.Font("Iceberg", 0, 24)); // NOI18N
+        jDeleteRecordButton.setForeground(new java.awt.Color(170, 170, 170));
+        jDeleteRecordButton.setText("Delete Record");
+        jDeleteRecordButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jDeleteRecordButton.addActionListener(this::jDeleteRecordButtonActionPerformed);
+
+        jUpdateRecord.setBackground(new java.awt.Color(53, 54, 55));
+        jUpdateRecord.setFont(new java.awt.Font("Iceberg", 0, 24)); // NOI18N
+        jUpdateRecord.setForeground(new java.awt.Color(170, 170, 170));
+        jUpdateRecord.setText("Update Record");
+        jUpdateRecord.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jUpdateRecord.addActionListener(this::jUpdateRecordActionPerformed);
+
         javax.swing.GroupLayout jDashboardPanelAdminLayout = new javax.swing.GroupLayout(jDashboardPanelAdmin);
         jDashboardPanelAdmin.setLayout(jDashboardPanelAdminLayout);
         jDashboardPanelAdminLayout.setHorizontalGroup(
@@ -1011,11 +950,11 @@ public class AdminInterface extends javax.swing.JFrame {
                     .addComponent(jScrollPane1)
                     .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jDashboardPanelAdminLayout.createSequentialGroup()
-                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
-                        .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(63, 63, 63)
-                        .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jAddRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(37, 37, 37)
+                        .addComponent(jDeleteRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                        .addComponent(jUpdateRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(26, 26, 26))
         );
         jDashboardPanelAdminLayout.setVerticalGroup(
@@ -1023,16 +962,15 @@ public class AdminInterface extends javax.swing.JFrame {
             .addGroup(jDashboardPanelAdminLayout.createSequentialGroup()
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jAddRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jDeleteRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jUpdateRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(44, 44, 44)
+                .addGap(33, 33, 33)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(68, 68, 68))
+                .addGap(69, 69, 69))
         );
 
         jParentPanel.add(jDashboardPanelAdmin, "card9");
@@ -1244,7 +1182,7 @@ public class AdminInterface extends javax.swing.JFrame {
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 608, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(45, Short.MAX_VALUE))
+                .addContainerGap(51, Short.MAX_VALUE))
         );
 
         jParentPanel.add(jAddRecordPanelAdmin, "card7");
@@ -1375,12 +1313,12 @@ public class AdminInterface extends javax.swing.JFrame {
             jDeleteRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jDeleteRecordPanelAdminLayout.createSequentialGroup()
                 .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 659, Short.MAX_VALUE))
+                .addGap(0, 665, Short.MAX_VALUE))
             .addGroup(jDeleteRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jDeleteRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(81, 81, 81)
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(81, Short.MAX_VALUE)))
+                    .addContainerGap(87, Short.MAX_VALUE)))
         );
 
         jParentPanel.add(jDeleteRecordPanelAdmin, "card2");
@@ -1501,7 +1439,7 @@ public class AdminInterface extends javax.swing.JFrame {
                 .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 72, Short.MAX_VALUE))
+                .addGap(0, 78, Short.MAX_VALUE))
         );
 
         jParentPanel.add(jUpdateRecordPanelAdmin, "card3");
@@ -1723,12 +1661,12 @@ public class AdminInterface extends javax.swing.JFrame {
             jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jActualUpdateRecordPanelAdminLayout.createSequentialGroup()
                 .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 659, Short.MAX_VALUE))
+                .addGap(0, 665, Short.MAX_VALUE))
             .addGroup(jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jActualUpdateRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(81, 81, 81)
                     .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 622, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(34, Short.MAX_VALUE)))
+                    .addContainerGap(40, Short.MAX_VALUE)))
         );
 
         jParentPanel.add(jActualUpdateRecordPanelAdmin, "card6");
@@ -1806,18 +1744,18 @@ public class AdminInterface extends javax.swing.JFrame {
     }//GEN-LAST:event_jDashboardButtonAdmin7ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        ExpenseController.SelectionSortByName(ExpenseList);
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        ExpenseSortController.SelectionSortByName(ExpenseRepository.expenses);
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        ExpenseController.InsertionSortByAmount(ExpenseList);
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        ExpenseSortController.InsertionSortByAmount(ExpenseRepository.expenses);
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        ExpenseController.BubbleSortById(ExpenseList);
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseList);
+        ExpenseSortController.BubbleSortById(ExpenseRepository.expenses);
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jAddFieldIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAddFieldIDActionPerformed
@@ -1827,13 +1765,6 @@ public class AdminInterface extends javax.swing.JFrame {
     private void jDashboardButtonAdmin3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDashboardButtonAdmin3ActionPerformed
             addRecord();
     }//GEN-LAST:event_jDashboardButtonAdmin3ActionPerformed
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        jParentPanel.removeAll();
-        jParentPanel.add(jAddRecordPanelAdmin);
-        jParentPanel.repaint();
-        jParentPanel.revalidate();
-    }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jDashboardButtonAdmin4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDashboardButtonAdmin4ActionPerformed
         jParentPanel.removeAll();
@@ -1900,7 +1831,7 @@ public class AdminInterface extends javax.swing.JFrame {
         }
 
         ExpenseModel target = null;
-        for(ExpenseModel e : ExpenseList){
+        for(ExpenseModel e : ExpenseRepository.expenses){
             if(e.getId() == id && e.getCategory().equalsIgnoreCase(category)){
                 target = e;
                 break;
@@ -2020,6 +1951,31 @@ public class AdminInterface extends javax.swing.JFrame {
         resetDeletePanel();
     }//GEN-LAST:event_jDashboardButtonAdmin17ActionPerformed
 
+    private void jAddRecordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAddRecordButtonActionPerformed
+        jParentPanel.removeAll();
+        jParentPanel.add(jAddRecordPanelAdmin);
+        jParentPanel.repaint();
+        jParentPanel.revalidate();
+    }//GEN-LAST:event_jAddRecordButtonActionPerformed
+
+    private void jDeleteRecordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDeleteRecordButtonActionPerformed
+        jParentPanel.removeAll();
+        jParentPanel.add(jDeleteRecordPanelAdmin);
+        jParentPanel.repaint();
+        jParentPanel.revalidate();
+    }//GEN-LAST:event_jDeleteRecordButtonActionPerformed
+
+    private void jUpdateRecordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUpdateRecordActionPerformed
+        jParentPanel.removeAll();
+        jParentPanel.add(jUpdateRecordPanelAdmin);
+        jParentPanel.repaint();
+        jParentPanel.revalidate();
+    }//GEN-LAST:event_jUpdateRecordActionPerformed
+
+    private void jUndoButtonAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUndoButtonAdminActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jUndoButtonAdminActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -2053,11 +2009,11 @@ public class AdminInterface extends javax.swing.JFrame {
     private javax.swing.JTextField jAddFieldExpenseTitle;
     private javax.swing.JTextField jAddFieldID;
     private javax.swing.JTextField jAddFieldName;
+    private javax.swing.JButton jAddRecordButton;
     private javax.swing.JPanel jAddRecordPanelAdmin;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JComboBox<String> jComboBoxCategory;
     private javax.swing.JComboBox<String> jComboBoxDeleteCategory;
     private javax.swing.JComboBox<String> jComboBoxUpdateCategory;
@@ -2083,6 +2039,7 @@ public class AdminInterface extends javax.swing.JFrame {
     private javax.swing.JTable jDashboardTableAdmin;
     private javax.swing.JButton jDeleteButton;
     private javax.swing.JButton jDeleteButton1;
+    private javax.swing.JButton jDeleteRecordButton;
     private javax.swing.JPanel jDeleteRecordPanelAdmin;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -2115,20 +2072,18 @@ public class AdminInterface extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jParentPanel;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextFieldDeleteID;
-    private javax.swing.JButton jUndoButton;
+    private javax.swing.JButton jUndoButtonAdmin;
     private javax.swing.JTextField jUpdateFieldAmount;
     private javax.swing.JTextField jUpdateFieldContact;
     private javax.swing.JTextField jUpdateFieldDate;
     private javax.swing.JTextField jUpdateFieldExpenseTitle;
     private javax.swing.JTextField jUpdateFieldID;
     private javax.swing.JTextField jUpdateFieldName;
+    private javax.swing.JButton jUpdateRecord;
     private javax.swing.JPanel jUpdateRecordPanelAdmin;
     private javax.swing.JTextField jUpdateTextFieldIDAdmin;
     // End of variables declaration//GEN-END:variables

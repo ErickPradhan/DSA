@@ -3,73 +3,176 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Controller;
-import Model.ExpenseModel;
-import java.util.ArrayList;
-/**
- *
- * @author erick
- */
-public class ExpenseController {
-    //Selection Sort:
-    public static void SelectionSortByName(ArrayList<ExpenseModel> list) 
-    {
-        int size = list.size();
 
-        for (int step = 0; step < size - 1; step++) 
-        {
-            // Find the index of the minimum element in the remaining unsorted array
-            int min_idx = step;
+import Model.*;
+import java.util.*;
 
-            for (int i = step + 1; i < size; i++) 
-            {
-                // Compare names alphabetically using compareTo()
-                // compareTo() returns a negative number if the first string comes before the second
-                if (list.get(i).getName().compareToIgnoreCase(list.get(min_idx).getName()) < 0) {
-                    min_idx = i; // Update the index to the new minimum
-                }
-            }
-            // Swap the found minimum element with the element at the current step position
-            ExpenseModel temp = list.get(step);
-            list.set(step, list.get(min_idx));
-            list.set(min_idx, temp);
+public class ExpenseController 
+{
+     // Queue = Tracks added records (for coursework requirement)
+    public static Queue<ExpenseModel> addQueue = new LinkedList<>();
+
+    // Stack = Tracks deleted records for Undo
+    public static Stack<ExpenseModel> deleteStack = new Stack<>();
+
+
+    // ===================== ADD RECORD =====================
+    public static String addExpense(
+            String idText,
+            String name,
+            String title,
+            String category,
+            String amountText,
+            String contact,
+            String date
+    ) {
+        StringBuilder errors = new StringBuilder();
+
+        int id = 0;
+        double amount = 0;
+
+        // ---- VALIDATION ----
+        try {
+            id = Integer.parseInt(idText);
+            if (id <= 0) errors.append("• ID must be positive.\n");
+        } catch (Exception e) {
+            errors.append("• ID must be a number.\n");
         }
+
+        if (name.isEmpty() || !name.matches("[a-zA-Z ]+"))
+            errors.append("• Name must contain only alphabets.\n");
+
+        if (title.isEmpty())
+            errors.append("• Expense title cannot be empty.\n");
+
+        try {
+            amount = Double.parseDouble(amountText);
+            if (amount <= 0) errors.append("• Amount must be greater than 0.\n");
+        } catch (Exception e) {
+            errors.append("• Amount must be numeric.\n");
+        }
+
+        if (!contact.matches("\\d{10}"))
+            errors.append("• Contact must be exactly 10 digits.\n");
+
+        if (!date.matches("\\d{4}-\\d{2}-\\d{2}"))
+            errors.append("• Date must be in YYYY-MM-DD format.\n");
+
+        // If validation failed → return errors
+        if (errors.length() > 0)
+            return errors.toString();
+
+        // ---- Create Model ----
+        ExpenseModel e = new ExpenseModel(
+                id, name, title, category, amount, contact, date
+        );
+
+        ExpenseRepository.expenses.add(e);
+        ExpenseRepository.save();
+
+        addQueue.offer(e);     // coursework: Queue usage
+
+        return "SUCCESS";
     }
-    //Insertion Sort:
-    public static void InsertionSortByAmount(ArrayList<ExpenseModel> list){
-    int size = list.size();
 
-        // Start from the second element (index 1) as the first element is trivially sorted
-        for (int i = 1; i < size; i++) {
-            // Pick the element to be inserted
-            ExpenseModel key = list.get(i);
-            int j = i - 1;
 
-            // Move elements of list[0..i-1], that are greater than key.getAge(), 
-            // to one position ahead of their current position
-            while (j >= 0 && list.get(j).getAmount() > key.getAmount()) {
-                // Shift the current element to the right
-                list.set(j + 1, list.get(j));
-                j = j - 1;
-            }
 
-            // Place the key (the current element from the outer loop) in its correct position
-            list.set(j + 1, key);
+    // ===================== SEARCH BY ID & CATEGORY =====================
+    public static ExpenseModel findExpense(int id, String category) {
+        for (ExpenseModel e : ExpenseRepository.expenses) {
+            if (e.getId() == id &&
+                e.getCategory().equalsIgnoreCase(category))
+                return e;
         }
+        return null;
     }
-    //Bubble Sort:
-    public static void BubbleSortById(ArrayList<ExpenseModel> list)
-    {
-        int n = list.size();
 
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - 1 - i; j++) {
 
-                if (list.get(j).getId() > list.get(j + 1).getId()) {
-                    ExpenseModel temp = list.get(j);
-                    list.set(j, list.get(j + 1));
-                    list.set(j + 1, temp);
-                }
-            }
+
+    // ===================== DELETE =====================
+    public static String deleteExpense(int id, String category) {
+
+        ExpenseModel target = findExpense(id, category);
+
+        if (target == null)
+            return "NOT_FOUND";
+
+        deleteStack.push(target);
+        ExpenseRepository.expenses.remove(target);
+
+        ExpenseRepository.save();
+        return "SUCCESS";
+    }
+
+
+
+    // ===================== UNDO DELETE =====================
+    public static String undoDelete() {
+
+        if (deleteStack.isEmpty())
+            return "EMPTY";
+
+        ExpenseModel e = deleteStack.pop();
+
+        // prevent duplicate
+        for (ExpenseModel x : ExpenseRepository.expenses) {
+            if (x.getId() == e.getId())
+                return "DUPLICATE";
         }
+
+        ExpenseRepository.expenses.add(e);
+        ExpenseRepository.save();
+
+        return "SUCCESS";
+    }
+
+
+
+    // ===================== UPDATE =====================
+    public static String updateExpense(
+            ExpenseModel record,
+            String name,
+            String title,
+            String category,
+            String amountText,
+            String contact,
+            String date
+    ) {
+        StringBuilder errors = new StringBuilder();
+        double amount = 0;
+
+        if (name.isEmpty())
+            errors.append("• Name cannot be empty.\n");
+
+        if (title.isEmpty())
+            errors.append("• Expense title cannot be empty.\n");
+
+        try {
+            amount = Double.parseDouble(amountText);
+            if (amount <= 0)
+                errors.append("• Amount must be greater than 0.\n");
+        } catch (Exception e) {
+            errors.append("• Amount must be numeric.\n");
+        }
+
+        if (!contact.matches("\\d{10}"))
+            errors.append("• Contact must be 10 digits.\n");
+
+        if (!date.matches("\\d{4}-\\d{2}-\\d{2}"))
+            errors.append("• Date must be YYYY-MM-DD.\n");
+
+        if (errors.length() > 0)
+            return errors.toString();
+
+        // ---- APPLY UPDATE ----
+        record.setName(name);
+        record.setExpenseTitle(title);
+        record.setCategory(category);
+        record.setAmount(amount);
+        record.setContact(contact);
+        record.setDate(date);
+
+        ExpenseRepository.save();
+        return "SUCCESS";
     }
 }
