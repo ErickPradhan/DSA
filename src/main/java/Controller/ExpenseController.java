@@ -1,22 +1,38 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Controller;
 
-import Model.*;
-import java.util.*;
+import Model.ExpenseModel;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
 
 public class ExpenseController 
 {
-     // Queue = Tracks added records (for coursework requirement)
+
+    // ===================== DATA STRUCTURES =====================
+
+    // Main storage (replaces CSV)
+    public static ArrayList<ExpenseModel> expenses = new ArrayList<>();
+
+    // Queue → track added records
     public static Queue<ExpenseModel> addQueue = new LinkedList<>();
 
-    // Stack = Tracks deleted records for Undo
+    // Stack → undo delete
     public static Stack<ExpenseModel> deleteStack = new Stack<>();
 
+    // ===================== Data =====================
+    public static void loadData() 
+    {  
+        if (!expenses.isEmpty()) return;
+    
+        expenses.add(new ExpenseModel(836, "Erick Pradhan", "Student Expense", "Food & Groceries", 2500, "9800000000", "2025-01-05"));
+        expenses.add(new ExpenseModel(283, "Sabal Shrestha", "Hostel Expense", "Transport / Travel", 1800, "9811111111", "2025-01-06"));
+        expenses.add(new ExpenseModel(103, "Shahil Basnet", "Tribal Rain Concert", "Entertainment / Leisure", 1000, "9822222222", "2025-01-11"));
+        expenses.add(new ExpenseModel(822, "Papit Ghimire", "Table Tennis Classes", "Entertainment / Leisure", 1500, "9833333333", "2025-01-02"));
+        expenses.add(new ExpenseModel(638, "Semi Limbu", "Cosmetics", "Health & Personal Care", 8000, "9877777777", "2025-01-24"));
+    }
 
-    // ===================== ADD RECORD =====================
+    // ===================== ADD =====================
     public static String addExpense(
             String idText,
             String name,
@@ -27,7 +43,6 @@ public class ExpenseController
             String date
     ) {
         StringBuilder errors = new StringBuilder();
-
         int id = 0;
         double amount = 0;
 
@@ -47,7 +62,8 @@ public class ExpenseController
 
         try {
             amount = Double.parseDouble(amountText);
-            if (amount <= 0) errors.append("• Amount must be greater than 0.\n");
+            if (amount <= 0)
+                errors.append("• Amount must be greater than 0.\n");
         } catch (Exception e) {
             errors.append("• Amount must be numeric.\n");
         }
@@ -58,74 +74,62 @@ public class ExpenseController
         if (!date.matches("\\d{4}-\\d{2}-\\d{2}"))
             errors.append("• Date must be in YYYY-MM-DD format.\n");
 
-        // If validation failed → return errors
         if (errors.length() > 0)
             return errors.toString();
 
-        // ---- Create Model ----
+        // ---- CREATE & ADD ----
         ExpenseModel e = new ExpenseModel(
                 id, name, title, category, amount, contact, date
         );
 
-        ExpenseRepository.expenses.add(e);
-        ExpenseRepository.save();
-
-        addQueue.offer(e);     // coursework: Queue usage
+        expenses.add(e);
+        addQueue.offer(e);
 
         return "SUCCESS";
     }
 
 
-
-    // ===================== SEARCH BY ID & CATEGORY =====================
+    // ===================== SEARCH =====================
     public static ExpenseModel findExpense(int id, String category) {
-        for (ExpenseModel e : ExpenseRepository.expenses) {
+        for (ExpenseModel e : expenses) {
             if (e.getId() == id &&
-                e.getCategory().equalsIgnoreCase(category))
+                e.getCategory().equalsIgnoreCase(category)) {
                 return e;
+            }
         }
         return null;
     }
 
 
-
     // ===================== DELETE =====================
     public static String deleteExpense(int id, String category) {
-
         ExpenseModel target = findExpense(id, category);
 
         if (target == null)
             return "NOT_FOUND";
 
         deleteStack.push(target);
-        ExpenseRepository.expenses.remove(target);
+        expenses.remove(target);
 
-        ExpenseRepository.save();
         return "SUCCESS";
     }
 
 
-
     // ===================== UNDO DELETE =====================
     public static String undoDelete() {
-
         if (deleteStack.isEmpty())
             return "EMPTY";
 
         ExpenseModel e = deleteStack.pop();
 
-        // prevent duplicate
-        for (ExpenseModel x : ExpenseRepository.expenses) {
+        for (ExpenseModel x : expenses) {
             if (x.getId() == e.getId())
                 return "DUPLICATE";
         }
 
-        ExpenseRepository.expenses.add(e);
-        ExpenseRepository.save();
-
+        expenses.add(e);
         return "SUCCESS";
     }
-
 
 
     // ===================== UPDATE =====================
@@ -172,7 +176,6 @@ public class ExpenseController
         record.setContact(contact);
         record.setDate(date);
 
-        ExpenseRepository.save();
         return "SUCCESS";
     }
 }

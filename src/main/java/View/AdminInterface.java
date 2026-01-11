@@ -4,6 +4,7 @@
  */
 package View;
 import Model.ExpenseModel;
+import Controller.ExpenseController;
 import Controller.ExpenseSortController;
 import java.awt.*;
 import javax.swing.*;
@@ -17,11 +18,12 @@ import javax.swing.JPanel;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Queue;
-import Controller.ExpenseRepository;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import java.util.Collections;
 
-public class AdminInterface extends javax.swing.JFrame {
+public class AdminInterface extends javax.swing.JFrame 
+{
     Queue<ExpenseModel> addQueue = new LinkedList<>();
     Stack<ExpenseModel> deleteStack = new Stack<>();
     private ExpenseModel updatingRecord;
@@ -34,34 +36,91 @@ public class AdminInterface extends javax.swing.JFrame {
 
     public AdminInterface() {
         initComponents();
-        
+
         jDashboardTableAdmin.setFillsViewportHeight(true);
         jScrollPane1.getViewport().setBackground(new Color(43,46,51));
 
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer();
-        headerRenderer.setBackground(new Color(33, 34, 35));   // header background
-        headerRenderer.setForeground(new Color(170, 170, 170)); // header text color
-        headerRenderer.setFont(new Font("Iceberg", Font.BOLD, 20)); // header font
+        headerRenderer.setBackground(new Color(33, 34, 35));
+        headerRenderer.setForeground(new Color(170, 170, 170));
+        headerRenderer.setFont(new Font("Iceberg", Font.BOLD, 20));
         headerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
         for (int i = 0; i < jDashboardTableAdmin.getColumnModel().getColumnCount(); i++) {
             jDashboardTableAdmin.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
         }
 
-        // Optional → remove ugly white border
         jDashboardTableAdmin.getTableHeader().setOpaque(false);
         jDashboardTableAdmin.getTableHeader().setReorderingAllowed(false);
 
-        
-        ExpenseRepository.load();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
+        // Loading table
+        ExpenseController.loadData();
 
-        
+        // Load table
+        loadStudentListToTable(
+            jDashboardTableAdmin,
+            ExpenseController.expenses
+        );
+
         setLocationRelativeTo(null);
-        
+
         jUndoButtonAdmin.addActionListener(e -> undoDelete());
         jDeleteButton.addActionListener(e -> deleteSelectedRecord());
+        
+        //Sorting Buttons & Combobox
+        jSortButtonAdmin.addActionListener(e -> {
+
+        String sortType = jSortComboBoxAdmin.getSelectedItem().toString();
+        String orderType = jAscendDesendComboBoxAdmin.getSelectedItem().toString();
+
+        // ---- VALIDATION ----
+        if (sortType.equals("Default") || orderType.equals("Default")) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Please select a sorting criterion (Name, ID, or Amount) and choose Ascending or Descending before clicking Sort.",
+                "Sorting Required",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        // ---- APPLY SORT (ASCENDING FIRST) ----
+        switch (sortType) {
+
+            case "Sort By Name":
+                ExpenseSortController.SelectionSortByName(
+                    ExpenseController.expenses
+                );
+                break;
+
+            case "Sort By ID":
+                ExpenseSortController.BubbleSortById(
+                    ExpenseController.expenses
+                );
+                break;
+
+            case "Sort By Amount":
+                ExpenseSortController.InsertionSortByAmount(
+                    ExpenseController.expenses
+                );
+                break;
+        }
+
+        // ---- DESCENDING HANDLING ----
+        if (orderType.equals("Descending")) {
+            Collections.reverse(ExpenseController.expenses);
+        }
+
+        // ---- REFRESH TABLE ----
+        loadStudentListToTable(
+            jDashboardTableAdmin,
+            ExpenseController.expenses
+        );
+    });
+
+
     }
+
     
     
     public static void loadStudentListToTable(javax.swing.JTable table, java.util.Collection<ExpenseModel> list){
@@ -303,14 +362,11 @@ public class AdminInterface extends javax.swing.JFrame {
                 date
         );
 
-        ExpenseRepository.expenses.add(exp);
-        ExpenseRepository.save();
+        ExpenseController.expenses.add(exp);
         
         addQueue.offer(exp);  
 
-        // Refresh Dashboard Table
-        ExpenseRepository.load();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseController.expenses);
 
         // Success message
         JOptionPane.showMessageDialog(
@@ -355,7 +411,7 @@ public class AdminInterface extends javax.swing.JFrame {
 
         ExpenseModel target = null;
 
-        for(ExpenseModel e : ExpenseRepository.expenses){
+        for(ExpenseModel e : ExpenseController.expenses){
             if(e.getId() == id && e.getCategory().equalsIgnoreCase(category)){
                 target = e;
                 break;
@@ -390,10 +446,9 @@ public class AdminInterface extends javax.swing.JFrame {
         // Push to undo stack
         deleteStack.push(target);
 
-        ExpenseRepository.expenses.remove(target);
+        ExpenseController.expenses.remove(target);
 
-        ExpenseRepository.save();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseController.expenses);
 
         JOptionPane.showMessageDialog(this,
             "Record deleted successfully.",
@@ -421,7 +476,7 @@ public class AdminInterface extends javax.swing.JFrame {
 
         // --- Prevent duplicate restore ---
         boolean exists = false;
-        for (ExpenseModel e : ExpenseRepository.expenses) {
+        for (ExpenseModel e : ExpenseController.expenses) {
             if (e.getId() == restored.getId()) {
                 exists = true;
                 break;
@@ -438,14 +493,13 @@ public class AdminInterface extends javax.swing.JFrame {
             return;
         }
 
-        ExpenseRepository.expenses.add(restored);
+        ExpenseController.expenses.add(restored);
 
-        ExpenseRepository.expenses.sort(
+        ExpenseController.expenses.sort(
             (a, b) -> Integer.compare(a.getId(), b.getId())
         );
 
-        ExpenseRepository.save();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseController.expenses);
 
         JOptionPane.showMessageDialog(
                 this,
@@ -509,7 +563,7 @@ public class AdminInterface extends javax.swing.JFrame {
         // ------- SEARCH RECORD -------
         ExpenseModel target = null;
 
-        for(ExpenseModel e : ExpenseRepository.expenses){
+        for(ExpenseModel e : ExpenseController.expenses){
             if(e.getId() == id && e.getCategory().equalsIgnoreCase(category)){
                 target = e;
                 break;
@@ -593,9 +647,8 @@ public class AdminInterface extends javax.swing.JFrame {
         updatingRecord.setAmount(amount);
         updatingRecord.setContact(contact);
         updatingRecord.setDate(date);
-
-        ExpenseRepository.save();
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
+        
+        loadStudentListToTable(jDashboardTableAdmin, ExpenseController.expenses);
 
         JOptionPane.showMessageDialog(
                 this,
@@ -658,10 +711,10 @@ public class AdminInterface extends javax.swing.JFrame {
         jDashboardPanelAdmin = new GradientPanelDark() ;
         jLabel4 = new javax.swing.JLabel();
         jPanel9 = new GradientPanelDark() ;
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
         jUndoButtonAdmin = new javax.swing.JButton();
+        jSortComboBoxAdmin = new javax.swing.JComboBox<>();
+        jSortButtonAdmin = new javax.swing.JButton();
+        jAscendDesendComboBoxAdmin = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         jDashboardTableAdmin = new javax.swing.JTable();
         jDashboardTableAdmin.setFillsViewportHeight(true);
@@ -840,27 +893,6 @@ public class AdminInterface extends javax.swing.JFrame {
         jPanel9.setBackground(new java.awt.Color(21, 20, 20));
         jPanel9.setPreferredSize(new java.awt.Dimension(1005, 70));
 
-        jButton1.setBackground(new java.awt.Color(53, 54, 55));
-        jButton1.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(170, 170, 170));
-        jButton1.setText("Sort By Name");
-        jButton1.setBorder(null);
-        jButton1.addActionListener(this::jButton1ActionPerformed);
-
-        jButton2.setBackground(new java.awt.Color(53, 54, 55));
-        jButton2.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(170, 170, 170));
-        jButton2.setText("Sort By Amount");
-        jButton2.setBorder(null);
-        jButton2.addActionListener(this::jButton2ActionPerformed);
-
-        jButton3.setBackground(new java.awt.Color(53, 54, 55));
-        jButton3.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jButton3.setForeground(new java.awt.Color(170, 170, 170));
-        jButton3.setText("Sort By ID");
-        jButton3.setBorder(null);
-        jButton3.addActionListener(this::jButton3ActionPerformed);
-
         jUndoButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
         jUndoButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
         jUndoButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
@@ -868,17 +900,36 @@ public class AdminInterface extends javax.swing.JFrame {
         jUndoButtonAdmin.setBorder(null);
         jUndoButtonAdmin.addActionListener(this::jUndoButtonAdminActionPerformed);
 
+        jSortComboBoxAdmin.setBackground(new java.awt.Color(53, 54, 55));
+        jSortComboBoxAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jSortComboBoxAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jSortComboBoxAdmin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Default Sort", "Sort By Name", "Sort By ID", "Sort By Amount" }));
+        jSortComboBoxAdmin.setBorder(null);
+        jSortComboBoxAdmin.addActionListener(this::jSortComboBoxAdminActionPerformed);
+
+        jSortButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
+        jSortButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jSortButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jSortButtonAdmin.setText("Sort");
+        jSortButtonAdmin.setBorder(null);
+
+        jAscendDesendComboBoxAdmin.setBackground(new java.awt.Color(53, 54, 55));
+        jAscendDesendComboBoxAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jAscendDesendComboBoxAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jAscendDesendComboBoxAdmin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Default", "Asending", "Descending" }));
+
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(142, 142, 142)
-                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(119, 119, 119)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jAscendDesendComboBoxAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30)
+                .addComponent(jSortButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jSortComboBoxAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -886,11 +937,11 @@ public class AdminInterface extends javax.swing.JFrame {
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addGap(22, 22, 22)
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                    .addComponent(jSortComboBoxAdmin)
+                    .addComponent(jSortButtonAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jAscendDesendComboBoxAdmin))
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
@@ -1743,21 +1794,6 @@ public class AdminInterface extends javax.swing.JFrame {
         jParentPanel.revalidate();
     }//GEN-LAST:event_jDashboardButtonAdmin7ActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        ExpenseSortController.SelectionSortByName(ExpenseRepository.expenses);
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        ExpenseSortController.InsertionSortByAmount(ExpenseRepository.expenses);
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        ExpenseSortController.BubbleSortById(ExpenseRepository.expenses);
-        loadStudentListToTable(jDashboardTableAdmin, ExpenseRepository.expenses);
-    }//GEN-LAST:event_jButton3ActionPerformed
-
     private void jAddFieldIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAddFieldIDActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jAddFieldIDActionPerformed
@@ -1831,7 +1867,7 @@ public class AdminInterface extends javax.swing.JFrame {
         }
 
         ExpenseModel target = null;
-        for(ExpenseModel e : ExpenseRepository.expenses){
+        for(ExpenseModel e : ExpenseController.expenses){
             if(e.getId() == id && e.getCategory().equalsIgnoreCase(category)){
                 target = e;
                 break;
@@ -1976,6 +2012,10 @@ public class AdminInterface extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jUndoButtonAdminActionPerformed
 
+    private void jSortComboBoxAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSortComboBoxAdminActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jSortComboBoxAdminActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -2011,9 +2051,7 @@ public class AdminInterface extends javax.swing.JFrame {
     private javax.swing.JTextField jAddFieldName;
     private javax.swing.JButton jAddRecordButton;
     private javax.swing.JPanel jAddRecordPanelAdmin;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JComboBox<String> jAscendDesendComboBoxAdmin;
     private javax.swing.JComboBox<String> jComboBoxCategory;
     private javax.swing.JComboBox<String> jComboBoxDeleteCategory;
     private javax.swing.JComboBox<String> jComboBoxUpdateCategory;
@@ -2075,6 +2113,8 @@ public class AdminInterface extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jParentPanel;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton jSortButtonAdmin;
+    private javax.swing.JComboBox<String> jSortComboBoxAdmin;
     private javax.swing.JTextField jTextFieldDeleteID;
     private javax.swing.JButton jUndoButtonAdmin;
     private javax.swing.JTextField jUpdateFieldAmount;
