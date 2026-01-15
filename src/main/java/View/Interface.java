@@ -4,6 +4,9 @@
  */
 package View;
 import Model.ExpenseModel;
+import Model.CurrentUser;
+import Controller.AuthController;
+import Model.User;
 import Controller.ExpenseController;
 import Controller.ExpenseSortController;
 import java.awt.*;
@@ -21,8 +24,9 @@ import java.util.Queue;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.util.Collections;
+import javax.swing.JOptionPane;
 
-public class AdminInterface extends javax.swing.JFrame 
+public class Interface extends javax.swing.JFrame 
 {
     Queue<ExpenseModel> addQueue = new LinkedList<>();
     Stack<ExpenseModel> deleteStack = new Stack<>();
@@ -32,10 +36,74 @@ public class AdminInterface extends javax.swing.JFrame
     private ExpenseModel lastUpdateFormState = null;
 
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AdminInterface.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Interface.class.getName());
 
-    public AdminInterface() {
+    public Interface() 
+    {
+        // Block direct access
+        if (!CurrentUser.isLoggedIn()) 
+        {
+            new LoginRegistrationInterface().setVisible(true);
+            dispose();
+            return;
+        }
         initComponents();
+        loadProfilePanel();
+        
+        jAddNoteTextField.addFocusListener(new java.awt.event.FocusAdapter() {
+
+        @Override
+        public void focusGained(java.awt.event.FocusEvent e) {
+            if (jAddNoteTextField.getText().equals("Add a note")) {
+                jAddNoteTextField.setText("");
+                jAddNoteTextField.setForeground(new Color(170, 170, 170));
+            }
+        }
+
+        @Override
+        public void focusLost(java.awt.event.FocusEvent e) {
+            if (jAddNoteTextField.getText().trim().isEmpty()) {
+                jAddNoteTextField.setText("Add a note");
+                jAddNoteTextField.setForeground(new Color(140, 140, 140));
+            }
+        }
+    });
+        
+        jAddNoteTextField.getDocument().addDocumentListener(
+            new javax.swing.event.DocumentListener() {
+
+                private void save() {
+                    User user = CurrentUser.get();
+                    if (user == null) return;
+
+                    user.setNote(jAddNoteTextField.getText());
+                    AuthController.saveUsers(); // persist immediately
+                }
+
+                @Override
+                public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                    save();
+                }
+
+                @Override
+                public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                    save();
+                }
+
+                @Override
+                public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                    save();
+                }
+            }
+        );
+        
+        jAddNoteTextField.addCaretListener(e -> 
+        {
+            User user = CurrentUser.get();
+            if (user != null) {
+                user.setNote(jAddNoteTextField.getText());
+            }
+        });
 
         jDashboardTableAdmin.setFillsViewportHeight(true);
         jScrollPane1.getViewport().setBackground(new Color(43,46,51));
@@ -107,23 +175,71 @@ public class AdminInterface extends javax.swing.JFrame
         }
 
         // ---- DESCENDING HANDLING ----
-        if (orderType.equals("Descending")) {
-            Collections.reverse(ExpenseController.expenses);
+        if (orderType.equals("Descending")) 
+        {
+                Collections.reverse(ExpenseController.expenses);
+            }
+
+            // ---- REFRESH TABLE ----
+            loadStudentListToTable(
+                jDashboardTableAdmin,
+                ExpenseController.expenses
+            );
+            loadProfilePanel();
+        });
+    }
+
+    private void loadProfilePanel() 
+    {
+        User user = CurrentUser.get();
+
+        // SAFETY CHECK
+        if (user == null) return;
+
+        // Username
+        jUserNameTextField.setText(user.getUsername());
+
+        // Full name + role
+        jNameRoleTextField.setText(
+            user.getFirstName() + " " +
+            user.getLastName() + " (" +
+            user.getRole() + ")"
+        );
+
+        // Date joined
+        jDateJoinedTextField.setText(
+            user.getDateJoined().toString()
+        );
+
+        // Note
+        jAddNoteTextField.setText(user.getNote());
+
+        // PROFILE IMAGE (important)
+        ImageIcon icon = user.getProfileImage();
+
+        if (icon == null) {
+            // fallback if image was not serialized
+            String path = user.getRole().equalsIgnoreCase("Admin")
+                    ? "/logo/AdminLogo.png"
+                    : "/logo/UserLogo.png";
+
+            icon = new ImageIcon(getClass().getResource(path));
         }
 
-        // ---- REFRESH TABLE ----
-        loadStudentListToTable(
-            jDashboardTableAdmin,
-            ExpenseController.expenses
-        );
-    });
-
-
+        jProfileImageLabel.setIcon(icon);
+        
+        // NOTE PLACEHOLDER
+        if (jAddNoteTextField.getText() == null || jAddNoteTextField.getText().trim().isEmpty()) {
+            jAddNoteTextField.setText("Add a note");
+            jAddNoteTextField.setForeground(new Color(140, 140, 140));
+        } else {
+            jAddNoteTextField.setForeground(new Color(170, 170, 170));
+        }
     }
 
     
-    
-    public static void loadStudentListToTable(javax.swing.JTable table, java.util.Collection<ExpenseModel> list){
+    public static void loadStudentListToTable(javax.swing.JTable table, java.util.Collection<ExpenseModel> list)
+    {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
         
@@ -427,7 +543,7 @@ public class AdminInterface extends javax.swing.JFrame
             return;
         }
 
-        // 🔥 CONFIRMATION BOX
+        // CONFIRMATION BOX
         int choice = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to delete this record?\n\n" +
@@ -691,7 +807,6 @@ public class AdminInterface extends javax.swing.JFrame
         jUpdateFieldDate.setText("");
         jComboBoxUpdateCategory2.setSelectedIndex(0);
     }
-
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -788,6 +903,29 @@ public class AdminInterface extends javax.swing.JFrame
         jDashboardButtonAdmin13 = new RoundedButton("Button Text") ;
         jDashboardButtonAdmin14 = new RoundedButton("Button Text") ;
         jDashboardButtonAdmin15 = new RoundedButton("Button Text") ;
+        jProfilePanel = new javax.swing.JPanel();
+        jPanel8 = new RoundedPanel(30);
+        jProfileImageLabel = new javax.swing.JLabel();
+        jUserNameTextField = new javax.swing.JTextField();
+        jNameRoleTextField = new javax.swing.JTextField();
+        jEditProfileButton = new RoundedButton("Button Text") ;
+        jTextField4 = new javax.swing.JTextField();
+        jDateJoinedTextField = new javax.swing.JTextField();
+        jTextField6 = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jAddNoteTextField = new javax.swing.JTextArea();
+        jLogoutButton = new RoundedButton("Button Text") ;
+        jPanel6 = new javax.swing.JPanel();
+        jRegistrationButton1 = new RoundedButton("Button Text") ;
+        jRegistrationButton2 = new RoundedButton("Button Text") ;
+        jParentProfilePanel = new javax.swing.JPanel();
+        jActivityPanel = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
+        jLogsPanel = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTextArea3 = new javax.swing.JTextArea();
+        jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(21, 20, 20));
@@ -1009,12 +1147,12 @@ public class AdminInterface extends javax.swing.JFrame
                         .addGap(22, 22, 22)
                         .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jScrollPane1)
-                            .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE)
+                            .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1010, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jDashboardPanelAdminLayout.createSequentialGroup()
                                 .addComponent(jAddRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(37, 37, 37)
                                 .addComponent(jDeleteRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
                                 .addComponent(jUpdateRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jDashboardPanelAdminLayout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1034,7 +1172,7 @@ public class AdminInterface extends javax.swing.JFrame
                     .addComponent(jAddRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jDeleteRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jUpdateRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1246,7 +1384,7 @@ public class AdminInterface extends javax.swing.JFrame
             .addGroup(jAddRecordPanelAdminLayout.createSequentialGroup()
                 .addGap(43, 43, 43)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(46, Short.MAX_VALUE))
+                .addContainerGap(50, Short.MAX_VALUE))
             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jAddRecordPanelAdminLayout.setVerticalGroup(
@@ -1255,7 +1393,7 @@ public class AdminInterface extends javax.swing.JFrame
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 608, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(91, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
 
         jParentPanel.add(jAddRecordPanelAdmin, "card7");
@@ -1380,18 +1518,18 @@ public class AdminInterface extends javax.swing.JFrame
                 .addGroup(jDeleteRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(44, 44, 44)
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(45, Short.MAX_VALUE)))
+                    .addContainerGap(49, Short.MAX_VALUE)))
         );
         jDeleteRecordPanelAdminLayout.setVerticalGroup(
             jDeleteRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jDeleteRecordPanelAdminLayout.createSequentialGroup()
                 .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 705, Short.MAX_VALUE))
+                .addGap(0, 712, Short.MAX_VALUE))
             .addGroup(jDeleteRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jDeleteRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(81, 81, 81)
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(127, Short.MAX_VALUE)))
+                    .addContainerGap(134, Short.MAX_VALUE)))
         );
 
         jParentPanel.add(jDeleteRecordPanelAdmin, "card2");
@@ -1501,7 +1639,7 @@ public class AdminInterface extends javax.swing.JFrame
         jUpdateRecordPanelAdminLayout.setHorizontalGroup(
             jUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jUpdateRecordPanelAdminLayout.createSequentialGroup()
-                .addContainerGap(46, Short.MAX_VALUE)
+                .addContainerGap(50, Short.MAX_VALUE)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(43, 43, 43))
             .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1512,7 +1650,7 @@ public class AdminInterface extends javax.swing.JFrame
                 .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 118, Short.MAX_VALUE))
+                .addGap(0, 125, Short.MAX_VALUE))
         );
 
         jParentPanel.add(jUpdateRecordPanelAdmin, "card3");
@@ -1723,26 +1861,271 @@ public class AdminInterface extends javax.swing.JFrame
         jActualUpdateRecordPanelAdmin.setLayout(jActualUpdateRecordPanelAdminLayout);
         jActualUpdateRecordPanelAdminLayout.setHorizontalGroup(
             jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, 1054, Short.MAX_VALUE)
+            .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, 1058, Short.MAX_VALUE)
             .addGroup(jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jActualUpdateRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(44, 44, 44)
                     .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(45, Short.MAX_VALUE)))
+                    .addContainerGap(49, Short.MAX_VALUE)))
         );
         jActualUpdateRecordPanelAdminLayout.setVerticalGroup(
             jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jActualUpdateRecordPanelAdminLayout.createSequentialGroup()
                 .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 705, Short.MAX_VALUE))
+                .addGap(0, 712, Short.MAX_VALUE))
             .addGroup(jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jActualUpdateRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(81, 81, 81)
                     .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 622, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(80, Short.MAX_VALUE)))
+                    .addContainerGap(87, Short.MAX_VALUE)))
         );
 
         jParentPanel.add(jActualUpdateRecordPanelAdmin, "card6");
+
+        jProfilePanel.setBackground(new java.awt.Color(21, 20, 20));
+
+        jPanel8.setBackground(new java.awt.Color(53, 54, 55));
+
+        jProfileImageLabel.setBackground(new java.awt.Color(21, 20, 20));
+        jProfileImageLabel.setFont(new java.awt.Font("Iceberg", 1, 12)); // NOI18N
+        jProfileImageLabel.setForeground(new java.awt.Color(170, 170, 170));
+        jProfileImageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jProfileImageLabel.setPreferredSize(new java.awt.Dimension(120, 120));
+
+        jUserNameTextField.setBackground(new java.awt.Color(53, 54, 55));
+        jUserNameTextField.setFont(new java.awt.Font("Iceberg", 1, 24)); // NOI18N
+        jUserNameTextField.setForeground(new java.awt.Color(170, 170, 170));
+        jUserNameTextField.setText("User Name");
+        jUserNameTextField.setBorder(null);
+
+        jNameRoleTextField.setBackground(new java.awt.Color(53, 54, 55));
+        jNameRoleTextField.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jNameRoleTextField.setForeground(new java.awt.Color(170, 170, 170));
+        jNameRoleTextField.setText("Name");
+        jNameRoleTextField.setBorder(null);
+        jNameRoleTextField.addActionListener(this::jNameRoleTextFieldActionPerformed);
+
+        jEditProfileButton.setBackground(new java.awt.Color(71, 71, 71));
+        jEditProfileButton.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jEditProfileButton.setForeground(new java.awt.Color(170, 170, 170));
+        jEditProfileButton.setText("Edit Profile");
+        jEditProfileButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jEditProfileButton.addActionListener(this::jEditProfileButtonActionPerformed);
+
+        jTextField4.setBackground(new java.awt.Color(53, 54, 55));
+        jTextField4.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jTextField4.setForeground(new java.awt.Color(170, 170, 170));
+        jTextField4.setText("Member Since");
+        jTextField4.setBorder(null);
+        jTextField4.addActionListener(this::jTextField4ActionPerformed);
+
+        jDateJoinedTextField.setBackground(new java.awt.Color(53, 54, 55));
+        jDateJoinedTextField.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jDateJoinedTextField.setForeground(new java.awt.Color(170, 170, 170));
+        jDateJoinedTextField.setText("Mar 10, 2023");
+        jDateJoinedTextField.setBorder(null);
+        jDateJoinedTextField.addActionListener(this::jDateJoinedTextFieldActionPerformed);
+
+        jTextField6.setBackground(new java.awt.Color(53, 54, 55));
+        jTextField6.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jTextField6.setForeground(new java.awt.Color(170, 170, 170));
+        jTextField6.setText("Note (Only visible to you)");
+        jTextField6.setBorder(null);
+        jTextField6.addActionListener(this::jTextField6ActionPerformed);
+
+        jScrollPane2.setBorder(null);
+
+        jAddNoteTextField.setBackground(new java.awt.Color(53, 54, 55));
+        jAddNoteTextField.setColumns(20);
+        jAddNoteTextField.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jAddNoteTextField.setForeground(new java.awt.Color(140, 140, 140));
+        jAddNoteTextField.setRows(5);
+        jAddNoteTextField.setText("Click to add a note");
+        jAddNoteTextField.setBorder(null);
+        jScrollPane2.setViewportView(jAddNoteTextField);
+
+        jLogoutButton.setBackground(new java.awt.Color(71, 71, 71));
+        jLogoutButton.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jLogoutButton.setForeground(new java.awt.Color(170, 170, 170));
+        jLogoutButton.setText("Log Out");
+        jLogoutButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLogoutButton.addActionListener(this::jLogoutButtonActionPerformed);
+
+        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
+        jPanel8.setLayout(jPanel8Layout);
+        jPanel8Layout.setHorizontalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addComponent(jProfileImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel8Layout.createSequentialGroup()
+                        .addGap(47, 47, 47)
+                        .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jDateJoinedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jEditProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jNameRoleTextField, javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jUserNameTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLogoutButton, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(128, Short.MAX_VALUE))
+        );
+        jPanel8Layout.setVerticalGroup(
+            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel8Layout.createSequentialGroup()
+                .addGap(66, 66, 66)
+                .addComponent(jProfileImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jUserNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jNameRoleTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jEditProfileButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(37, 37, 37)
+                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jDateJoinedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35)
+                .addComponent(jLogoutButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(77, Short.MAX_VALUE))
+        );
+
+        jPanel6.setBackground(new java.awt.Color(21, 20, 20));
+
+        jRegistrationButton1.setBackground(new java.awt.Color(21, 20, 20));
+        jRegistrationButton1.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jRegistrationButton1.setForeground(new java.awt.Color(170, 170, 170));
+        jRegistrationButton1.setText("Activity");
+        jRegistrationButton1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jRegistrationButton1.addActionListener(this::jRegistrationButton1ActionPerformed);
+
+        jRegistrationButton2.setBackground(new java.awt.Color(21, 20, 20));
+        jRegistrationButton2.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jRegistrationButton2.setForeground(new java.awt.Color(170, 170, 170));
+        jRegistrationButton2.setText("Logs");
+        jRegistrationButton2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jRegistrationButton2.addActionListener(this::jRegistrationButton2ActionPerformed);
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jRegistrationButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jRegistrationButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(349, Short.MAX_VALUE))
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(jRegistrationButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jRegistrationButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        jParentProfilePanel.setBackground(new java.awt.Color(21, 20, 20));
+        jParentProfilePanel.setForeground(new java.awt.Color(170, 170, 170));
+        jParentProfilePanel.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jParentProfilePanel.setLayout(new java.awt.CardLayout());
+
+        jActivityPanel.setBackground(new java.awt.Color(21, 20, 20));
+        jActivityPanel.setForeground(new java.awt.Color(170, 170, 170));
+        jActivityPanel.setPreferredSize(new java.awt.Dimension(513, 642));
+
+        jScrollPane3.setBorder(null);
+
+        jTextArea2.setBackground(new java.awt.Color(21, 20, 20));
+        jTextArea2.setColumns(20);
+        jTextArea2.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jTextArea2.setForeground(new java.awt.Color(170, 170, 170));
+        jTextArea2.setRows(5);
+        jTextArea2.setText("Activities\n");
+        jTextArea2.setBorder(null);
+        jScrollPane3.setViewportView(jTextArea2);
+
+        javax.swing.GroupLayout jActivityPanelLayout = new javax.swing.GroupLayout(jActivityPanel);
+        jActivityPanel.setLayout(jActivityPanelLayout);
+        jActivityPanelLayout.setHorizontalGroup(
+            jActivityPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE)
+        );
+        jActivityPanelLayout.setVerticalGroup(
+            jActivityPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 642, Short.MAX_VALUE)
+        );
+
+        jParentProfilePanel.add(jActivityPanel, "card2");
+
+        jLogsPanel.setBackground(new java.awt.Color(21, 20, 20));
+        jLogsPanel.setForeground(new java.awt.Color(170, 170, 170));
+
+        jScrollPane4.setBorder(null);
+
+        jTextArea3.setBackground(new java.awt.Color(21, 20, 20));
+        jTextArea3.setColumns(20);
+        jTextArea3.setFont(new java.awt.Font("Iceberg", 0, 14)); // NOI18N
+        jTextArea3.setForeground(new java.awt.Color(170, 170, 170));
+        jTextArea3.setRows(5);
+        jTextArea3.setText("Logins and Logouts\n");
+        jTextArea3.setBorder(null);
+        jScrollPane4.setViewportView(jTextArea3);
+
+        javax.swing.GroupLayout jLogsPanelLayout = new javax.swing.GroupLayout(jLogsPanel);
+        jLogsPanel.setLayout(jLogsPanelLayout);
+        jLogsPanelLayout.setHorizontalGroup(
+            jLogsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE)
+        );
+        jLogsPanelLayout.setVerticalGroup(
+            jLogsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 642, Short.MAX_VALUE)
+        );
+
+        jParentProfilePanel.add(jLogsPanel, "card3");
+
+        jSeparator1.setBackground(new java.awt.Color(21, 20, 20));
+        jSeparator1.setForeground(new java.awt.Color(170, 170, 170));
+
+        javax.swing.GroupLayout jProfilePanelLayout = new javax.swing.GroupLayout(jProfilePanel);
+        jProfilePanel.setLayout(jProfilePanelLayout);
+        jProfilePanelLayout.setHorizontalGroup(
+            jProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jProfilePanelLayout.createSequentialGroup()
+                .addGap(35, 35, 35)
+                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jParentProfilePanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(41, Short.MAX_VALUE))
+        );
+        jProfilePanelLayout.setVerticalGroup(
+            jProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jProfilePanelLayout.createSequentialGroup()
+                .addGap(43, 43, 43)
+                .addGroup(jProfilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jProfilePanelLayout.createSequentialGroup()
+                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(4, 4, 4)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(4, 4, 4)
+                        .addComponent(jParentProfilePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(0, 47, Short.MAX_VALUE))
+        );
+
+        jParentPanel.add(jProfilePanel, "card6");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -1810,8 +2193,9 @@ public class AdminInterface extends javax.swing.JFrame
     }//GEN-LAST:event_jDashboardButtonAdmin6ActionPerformed
 
     private void jDashboardButtonAdmin7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDashboardButtonAdmin7ActionPerformed
+        loadProfilePanel();
         jParentPanel.removeAll();
-        jParentPanel.add(jUpdateRecordPanelAdmin);
+        jParentPanel.add(jProfilePanel);
         jParentPanel.repaint();
         jParentPanel.revalidate();
     }//GEN-LAST:event_jDashboardButtonAdmin7ActionPerformed
@@ -2038,6 +2422,69 @@ public class AdminInterface extends javax.swing.JFrame
         // TODO add your handling code here:
     }//GEN-LAST:event_jSortComboBoxAdminActionPerformed
 
+    private void jNameRoleTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jNameRoleTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jNameRoleTextFieldActionPerformed
+
+    private void jEditProfileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jEditProfileButtonActionPerformed
+        User current = CurrentUser.get();
+        if (current == null) return;
+
+        // 🔥 GET THE REAL STORED USER (THIS IS THE FIX)
+        User storedUser = AuthController.getUserByUsername(current.getUsername());
+
+        RegistrationInterface ri = new RegistrationInterface(storedUser);
+        ri.setLocationRelativeTo(null);   // center window
+        ri.setVisible(true);
+
+        dispose();
+    }//GEN-LAST:event_jEditProfileButtonActionPerformed
+
+    private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField4ActionPerformed
+
+    private void jDateJoinedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDateJoinedTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jDateJoinedTextFieldActionPerformed
+
+    private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField6ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField6ActionPerformed
+
+    private void jRegistrationButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRegistrationButton1ActionPerformed
+        jParentProfilePanel.removeAll();
+        jParentProfilePanel.add(jActivityPanel);
+        jParentProfilePanel.repaint();
+        jParentProfilePanel.revalidate();
+    }//GEN-LAST:event_jRegistrationButton1ActionPerformed
+
+    private void jRegistrationButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRegistrationButton2ActionPerformed
+        jParentProfilePanel.removeAll();
+        jParentProfilePanel.add(jLogsPanel);
+        jParentProfilePanel.repaint();
+        jParentProfilePanel.revalidate();
+    }//GEN-LAST:event_jRegistrationButton2ActionPerformed
+
+    private void jLogoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLogoutButtonActionPerformed
+        int choice = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to logout?",
+            "Confirm Logout",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (choice != JOptionPane.YES_OPTION) return;
+
+        // CLEAR SESSION
+        CurrentUser.clear();
+
+        // BACK TO LOGIN
+        new LoginRegistrationInterface().setVisible(true);
+        dispose();
+    }//GEN-LAST:event_jLogoutButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -2060,10 +2507,11 @@ public class AdminInterface extends javax.swing.JFrame
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new AdminInterface().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new Interface().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel jActivityPanel;
     private javax.swing.JPanel jActualUpdateRecordPanelAdmin;
     private javax.swing.JTextField jAddFieldAmount;
     private javax.swing.JTextField jAddFieldContact;
@@ -2071,6 +2519,7 @@ public class AdminInterface extends javax.swing.JFrame
     private javax.swing.JTextField jAddFieldExpenseTitle;
     private javax.swing.JTextField jAddFieldID;
     private javax.swing.JTextField jAddFieldName;
+    private javax.swing.JTextArea jAddNoteTextField;
     private javax.swing.JButton jAddRecordButton;
     private javax.swing.JPanel jAddRecordPanelAdmin;
     private javax.swing.JComboBox<String> jAscendDesendComboBoxAdmin;
@@ -2097,10 +2546,12 @@ public class AdminInterface extends javax.swing.JFrame
     private javax.swing.JButton jDashboardButtonAdmin9;
     private javax.swing.JPanel jDashboardPanelAdmin;
     private javax.swing.JTable jDashboardTableAdmin;
+    private javax.swing.JTextField jDateJoinedTextField;
     private javax.swing.JButton jDeleteButton;
     private javax.swing.JButton jDeleteButton1;
     private javax.swing.JButton jDeleteRecordButton;
     private javax.swing.JPanel jDeleteRecordPanelAdmin;
+    private javax.swing.JButton jEditProfileButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -2125,6 +2576,9 @@ public class AdminInterface extends javax.swing.JFrame
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JButton jLogoutButton;
+    private javax.swing.JPanel jLogsPanel;
+    private javax.swing.JTextField jNameRoleTextField;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
@@ -2132,13 +2586,28 @@ public class AdminInterface extends javax.swing.JFrame
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jParentPanel;
+    private javax.swing.JPanel jParentProfilePanel;
+    private javax.swing.JLabel jProfileImageLabel;
+    private javax.swing.JPanel jProfilePanel;
+    private javax.swing.JButton jRegistrationButton1;
+    private javax.swing.JButton jRegistrationButton2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JButton jSortButtonAdmin;
     private javax.swing.JButton jSortButtonAdmin1;
     private javax.swing.JComboBox<String> jSortComboBoxAdmin;
+    private javax.swing.JTextArea jTextArea2;
+    private javax.swing.JTextArea jTextArea3;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField4;
+    private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextFieldDeleteID;
     private javax.swing.JButton jUndoButtonAdmin;
     private javax.swing.JTextField jUpdateFieldAmount;
@@ -2150,5 +2619,6 @@ public class AdminInterface extends javax.swing.JFrame
     private javax.swing.JButton jUpdateRecord;
     private javax.swing.JPanel jUpdateRecordPanelAdmin;
     private javax.swing.JTextField jUpdateTextFieldIDAdmin;
+    private javax.swing.JTextField jUserNameTextField;
     // End of variables declaration//GEN-END:variables
 }

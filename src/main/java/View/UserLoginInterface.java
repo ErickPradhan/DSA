@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
+import Model.User;
+import Model.CurrentUser;
 
 /**
  *
@@ -90,8 +92,14 @@ public class UserLoginInterface extends javax.swing.JFrame {
                 case "SUCCESS":
                     loginAttempts = 0;
                     isLocked = false;
+                    
                     JOptionPane.showMessageDialog(this,"User Login Successful!");
-                    new AdminInterface().setVisible(true);
+                    
+                    User loggedInUser = AuthController.getUserByUsername(user);
+                    CurrentUser.set(loggedInUser);
+
+                    
+                    new Interface().setVisible(true);
                     dispose();
                     break;
 

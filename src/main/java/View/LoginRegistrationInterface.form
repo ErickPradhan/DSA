@@ -144,7 +144,7 @@
                   <Color blue="aa" green="aa" red="aa" type="rgb"/>
                 </Property>
                 <Property name="horizontalAlignment" type="int" value="0"/>
-                <Property name="text" type="java.lang.String" value="Select Your Role"/>
+                <Property name="text" type="java.lang.String" value="Select Option"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JButton" name="jLoginButtonAdmin">

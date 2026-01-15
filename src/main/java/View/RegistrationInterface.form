@@ -75,9 +75,9 @@
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                   <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="19" max="32767" attributes="0"/>
+                  <EmptySpace pref="36" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -124,16 +124,8 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="jLabel3" alignment="0" min="-2" pref="132" max="-2" attributes="0"/>
                                   <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                                      <Group type="102" attributes="0">
-                                          <Component id="jConfirmPasswordCheckBox" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="32767" attributes="0"/>
-                                          <Component id="jTextField2" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="102" attributes="0">
-                                          <Component id="jFirstPasswordCheckBox" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="32767" attributes="0"/>
-                                          <Component id="jTextField1" min="-2" max="-2" attributes="0"/>
-                                      </Group>
+                                      <Component id="jConfirmPasswordCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jFirstPasswordCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Component id="jPanel10" alignment="0" max="32767" attributes="0"/>
                                       <Component id="jPanel9" alignment="0" max="32767" attributes="0"/>
                                       <Group type="102" alignment="1" attributes="0">
@@ -142,6 +134,7 @@
                                           <Component id="jPanel11" min="-2" pref="161" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
+                                  <Component id="jLabel4" alignment="0" min="-2" pref="132" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
                           </Group>
@@ -160,7 +153,10 @@
                       <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
                       <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
-                      <Component id="jLabel1" min="-2" pref="25" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jLabel1" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
+                          <Component id="jLabel4" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
@@ -175,7 +171,7 @@
                           </Group>
                           <Component id="jProfileImageLabel" alignment="0" min="-2" pref="150" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="1" attributes="0">
                               <Component id="jPanel13" min="-2" max="-2" attributes="0"/>
@@ -191,18 +187,12 @@
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="jPanel9" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="jFirstPasswordCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jTextField1" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
+                              <Component id="jFirstPasswordCheckBox" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
                               <Component id="jPanel10" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="jConfirmPasswordCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jTextField2" alignment="3" min="-2" pref="19" max="-2" attributes="0"/>
-                              </Group>
+                              <Component id="jConfirmPasswordCheckBox" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
@@ -266,7 +256,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -323,7 +313,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -380,7 +370,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -437,7 +427,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -494,7 +484,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -512,7 +502,7 @@
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jUserNameTextField" alignment="1" pref="25" max="32767" attributes="0"/>
+                      <Component id="jUserNameTextField" alignment="1" pref="27" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
@@ -554,7 +544,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -605,7 +595,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -704,7 +694,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -717,12 +707,12 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jRegistrationRoleComboBox" alignment="0" pref="151" max="32767" attributes="0"/>
+                      <Component id="jRegistrationRoleComboBox" alignment="1" pref="151" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jRegistrationRoleComboBox" alignment="0" pref="25" max="32767" attributes="0"/>
+                      <Component id="jRegistrationRoleComboBox" alignment="0" pref="27" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
@@ -813,7 +803,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -883,7 +873,7 @@
                           <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                         </LineBorder>
                       </Border>
-                      <Font PropertyName="font" name="Iceberg" size="14" style="0"/>
+                      <Font PropertyName="font" name="Iceberg" size="12" style="0"/>
                       <Color PropertyName="color" blue="aa" green="aa" red="aa" type="rgb"/>
                     </TitledBorder>
                   </Border>
@@ -897,12 +887,11 @@
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <Component id="jMonthComboBox" min="-2" pref="116" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="jDayComboBox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="jYearComboBox" min="-2" pref="83" max="-2" attributes="0"/>
+                          <Component id="jMonthComboBox" min="-2" pref="106" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jDayComboBox" min="-2" pref="93" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jYearComboBox" min="-2" pref="103" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1087,38 +1076,18 @@
                 </Property>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="jTextField1">
+            <Component class="javax.swing.JLabel" name="jLabel4">
               <Properties>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                  <Color blue="14" green="14" red="15" type="rgb"/>
+                  <Color blue="37" green="36" red="35" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Iceberg" size="10" style="0"/>
+                  <Font name="Iceberg" size="12" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="aa" green="aa" red="aa" type="rgb"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Alert Message"/>
-                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                  <Border info="null"/>
-                </Property>
-              </Properties>
-            </Component>
-            <Component class="javax.swing.JTextField" name="jTextField2">
-              <Properties>
-                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                  <Color blue="14" green="14" red="15" type="rgb"/>
-                </Property>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Iceberg" size="10" style="0"/>
-                </Property>
-                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                  <Color blue="aa" green="aa" red="aa" type="rgb"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Alert Message"/>
-                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                  <Border info="null"/>
-                </Property>
+                <Property name="text" type="java.lang.String" value="Profile Picture"/>
               </Properties>
             </Component>
           </SubComponents>

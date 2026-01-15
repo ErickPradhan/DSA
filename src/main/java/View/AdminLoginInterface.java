@@ -9,6 +9,8 @@ import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
 import Controller.AuthController;
+import Model.User;
+import Model.CurrentUser;
 
 
 /**
@@ -55,66 +57,6 @@ public class AdminLoginInterface extends javax.swing.JFrame {
 
         jUsernameTextFieldAdmin.addActionListener(e -> jLoginButtonAdmin.doClick());
         jPasswordTextFieldAdmin.addActionListener(e -> jLoginButtonAdmin.doClick());
-
-    
-        //Action Listener
-        jLoginButtonAdmin.addActionListener(e ->
-        {
-            String user = jUsernameTextFieldAdmin.getText().trim();
-            String pass = new String(jPasswordTextFieldAdmin.getPassword()).trim();
-
-            // === EMPTY FIELD VALIDATION ===
-            if(user.isEmpty() && pass.isEmpty())
-            {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter your Username and Password!");
-                return;
-            }
-
-            if(user.isEmpty())
-            {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter your Username!");
-                return;
-            }
-
-            if(pass.isEmpty())
-            {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter your Password!");
-                return;
-            }
-            String result = AuthController.login(user, pass, "admin");
-
-            switch (result)
-            {
-                case "SUCCESS":
-                    loginAttempts = 0;
-                    isLocked = false;
-                    JOptionPane.showMessageDialog(this,"Admin Login Successful!");
-                    new AdminInterface().setVisible(true);
-                    dispose();
-                    break;
-
-                case "WRONG_USERNAME":
-                    JOptionPane.showMessageDialog(this,"Invalid Admin's Username!");
-                    loginAttempts++;
-                    checkAttempts();
-                    break;
-
-                case "WRONG_PASSWORD":
-                    JOptionPane.showMessageDialog(this,"Your password is incorrect, please try again!");
-                    loginAttempts++;
-                    checkAttempts();
-                    break;
-
-                case "BOTH_WRONG":
-                    JOptionPane.showMessageDialog(this,"Invalid credentials, please try again!");
-                    loginAttempts++;
-                    checkAttempts();
-                    break;
-            }
-        });
     }
     
     private void checkAttempts()
@@ -209,9 +151,9 @@ public class AdminLoginInterface extends javax.swing.JFrame {
     public class RoundedButton extends JButton 
     {
         final int radius = 30;
-        final Color normalColor = new Color(30,30,30);
-        final Color hoverColor = new Color(50,50,50);
-        final Color pressColor = new Color(20,20,20);
+        final Color normalColor = new Color(30, 30, 30);
+        final Color hoverColor  = new Color(50, 50, 50);
+        final Color pressColor  = new Color(20, 20, 20);
 
         public RoundedButton(String text) 
         {
@@ -404,7 +346,56 @@ public class AdminLoginInterface extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jLoginButtonAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonAdminActionPerformed
+    String username = jUsernameTextFieldAdmin.getText().trim();
+    String password = new String(jPasswordTextFieldAdmin.getPassword()).trim();
 
+    String result = AuthController.login(username, password, "admin");
+
+    switch (result) {
+
+        case "SUCCESS":
+
+            // 🔑 Get full user object
+            User user = AuthController.getUserByUsername(username);
+
+            // Hardcoded admin fallback
+            if (user == null) {
+                user = new User(
+                    "admin",
+                    "admin123",
+                    "Admin",
+                    "Admin",
+                    "",
+                    new ImageIcon(getClass().getResource("/logo/AdminLogo.png")),
+                    java.time.LocalDate.now()
+                );
+            }
+
+            CurrentUser.set(user);
+
+            JOptionPane.showMessageDialog(this, "Admin Login Successful!");
+
+            new Interface().setVisible(true);
+            dispose();
+            break;
+
+        case "WRONG_USERNAME":
+            JOptionPane.showMessageDialog(this, "Invalid Admin Username!");
+            loginAttempts++;
+            checkAttempts();
+            break;
+
+        case "WRONG_PASSWORD":
+            JOptionPane.showMessageDialog(this, "Incorrect Password!");
+            loginAttempts++;
+            checkAttempts();
+            break;
+
+        default:
+            JOptionPane.showMessageDialog(this, "Login Failed!");
+            loginAttempts++;
+            checkAttempts();
+    }
     }//GEN-LAST:event_jLoginButtonAdminActionPerformed
 
     private void jUsernameTextFieldAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUsernameTextFieldAdminActionPerformed

@@ -205,7 +205,7 @@ public class LoginRegistrationInterface extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(170, 170, 170));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Select Your Role");
+        jLabel2.setText("Select Option");
 
         jLoginButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
         jLoginButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N

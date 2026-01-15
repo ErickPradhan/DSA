@@ -3,19 +3,31 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package View;
+import Model.User;
+import Model.CurrentUser;
+import Controller.AuthController;
+import java.time.LocalDate;
 import java.awt.*;
 import java.io.File;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+import java.awt.Rectangle;
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  *
  * @author erick
  */
-public class RegistrationInterface extends javax.swing.JFrame {
+public class RegistrationInterface extends javax.swing.JFrame 
+{
+    private User editingUser = null;
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(RegistrationInterface.class.getName());
+    
+    private boolean editMode = false;
+    
     
     // ===== FLAG =====
     private boolean isCustomImageSelected = false;
@@ -23,32 +35,30 @@ public class RegistrationInterface extends javax.swing.JFrame {
     public RegistrationInterface() 
     {
         initComponents();
-        // Colors ComboBox
+        addHoverEffect();
 
-        
-        jRegistrationRoleComboBox.setOpaque(true);
-        jMonthComboBox.setOpaque(true);
-        jDayComboBox.setOpaque(true);
-        jYearComboBox.setOpaque(true);
+        /* 1️⃣ Force dark UI + arrow FIRST */
+        makeComboBoxDark(jRegistrationRoleComboBox);
+        makeComboBoxDark(jMonthComboBox);
+        makeComboBoxDark(jDayComboBox);
+        makeComboBoxDark(jYearComboBox);
 
-        jRegistrationRoleComboBox.setBackground(new Color(21, 20, 20));
-        jMonthComboBox.setBackground(new Color(21, 20, 20));
-        jDayComboBox.setBackground(new Color(21, 20, 20));
-        jYearComboBox.setBackground(new Color(21, 20, 20));
-        
-        // SAME renderer everywhere
+        /* 2️⃣ Renderer (text colors for collapsed + popup) */
         jRegistrationRoleComboBox.setRenderer(darkComboRenderer);
         jMonthComboBox.setRenderer(darkComboRenderer);
         jDayComboBox.setRenderer(darkComboRenderer);
         jYearComboBox.setRenderer(darkComboRenderer);
 
-        // SAME popup theme everywhere
+        /* 3️⃣ Popup background ONLY */
         fixComboPopupColors(jRegistrationRoleComboBox);
         fixComboPopupColors(jMonthComboBox);
         fixComboPopupColors(jDayComboBox);
         fixComboPopupColors(jYearComboBox);
-
-
+        
+        /* CheckBox Color */
+        makeCheckBoxDark(jFirstPasswordCheckBox);
+        makeCheckBoxDark(jConfirmPasswordCheckBox);
+        
         pack();
         setLocationRelativeTo(null);
         setResizable(false);
@@ -56,7 +66,16 @@ public class RegistrationInterface extends javax.swing.JFrame {
         loadDefaultProfileImage();
         addListeners();
     }
+    
+    public RegistrationInterface(User user) 
+    {
+        initComponents();
+        setLocationRelativeTo(null);
+        this.editingUser = user;
+        loadUserForEdit();
+    }
 
+    
     private void loadDefaultProfileImage() 
     {
         java.net.URL location = getClass().getResource("/logo/UserLogo.png");
@@ -70,7 +89,6 @@ public class RegistrationInterface extends javax.swing.JFrame {
         Image img = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
         jProfileImageLabel.setIcon(new ImageIcon(img));
     }
-
     
     private void addListeners() 
     {
@@ -127,10 +145,34 @@ public class RegistrationInterface extends javax.swing.JFrame {
         });
 
         // REGISTER BUTTON
-        jRegistrationButton.addActionListener(e -> registerUser());
+        jRegistrationButton.addActionListener(e -> confirmAndRegister());
+
 
         // BACK BUTTON
-        jRegistrationBackButton.addActionListener(e -> dispose());
+        jRegistrationBackButton.addActionListener(e -> 
+        {
+
+            if (hasUnsavedData()) {
+
+                int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to go back?",
+                    "Confirm Navigation",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+                );
+
+                if (choice == JOptionPane.YES_OPTION) {
+                    new LoginRegistrationInterface().setVisible(true);
+                    dispose();
+                }
+
+            } else {
+                new LoginRegistrationInterface().setVisible(true);
+                dispose();
+            }
+        });
+
     }
     
     private Font loadIcebergFont(float size) 
@@ -146,7 +188,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         }
     }
     
-    private void registerUser() 
+    private boolean registerUser() 
     {
 
         StringBuilder missing = new StringBuilder();
@@ -156,6 +198,24 @@ public class RegistrationInterface extends javax.swing.JFrame {
         boolean hasInvalid = false;
 
         /* ===== PERSONAL DETAILS ===== */
+        String username = jUserNameTextField.getText().trim();
+
+        // Empty check First
+        if (username.isEmpty()) {
+            missing.append("• Username\n");
+            hasMissing = true;
+        } 
+        // Duplicate second 
+        else if (editingUser == null && AuthController.usernameExists(username)) 
+        {
+            JOptionPane.showMessageDialog(
+                this,
+                "Username already exists. Please choose another one.",
+                "Registration Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return false;
+        }
 
         // First Name
         String firstName = jFirstNameTextField.getText().trim();
@@ -335,7 +395,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
             missing.append("• Role\n");
             hasMissing = true;
         }
-
+        
         /* ===== FINAL DIALOG ===== */
 
         if (hasMissing || hasInvalid) {
@@ -369,19 +429,138 @@ public class RegistrationInterface extends javax.swing.JFrame {
             "Form Validation Error",
             JOptionPane.WARNING_MESSAGE
         );
-        return;
+        return false;
         }
+        return true;
+    }
+    
+    private void showRegistrationSuccess() 
+    {
 
-        /* ===== SUCCESS ===== */
+        String username = jUserNameTextField.getText().trim();
 
         JOptionPane.showMessageDialog(
             this,
-            "Registration completed successfully!",
-            "Success",
+            "Thank you for your Registration, " + username,
+            "Registration Successful",
             JOptionPane.INFORMATION_MESSAGE
         );
 
+        new LoginRegistrationInterface().setVisible(true);
         dispose();
+    }
+
+    
+    //Register 
+    private void confirmAndRegister() 
+    {
+        if (editingUser != null) {
+
+        editingUser.setFirstName(jFirstNameTextField.getText().trim());
+        editingUser.setLastName(jLastNameTextField.getText().trim());
+        editingUser.setEmail(jEmailAddressTextField.getText().trim());
+        editingUser.setContactNumber(jContactNumberTextField.getText().trim());
+        editingUser.setAddress(jAddressTextArea.getText().trim());
+
+        String dob =
+            jMonthComboBox.getSelectedItem() + "-" +
+            jDayComboBox.getSelectedItem() + "-" +
+            jYearComboBox.getSelectedItem();
+
+        editingUser.setDob(dob);
+
+        if (jFirstPasswordTextField.getPassword().length > 0) {
+            editingUser.setPassword(
+                new String(jFirstPasswordTextField.getPassword())
+            );
+        }
+
+        editingUser.setProfileImage(
+            (ImageIcon) jProfileImageLabel.getIcon()
+        );
+
+        AuthController.saveUsers();
+        CurrentUser.set(editingUser);
+
+        JOptionPane.showMessageDialog(this, "Profile updated successfully");
+
+        new Interface().setVisible(true);
+        dispose();
+        return;
+    }
+
+        // Step 1: Validate form first
+        if (!registerUser()) {
+            return;
+        }
+
+        // Step 2: Confirmation panel
+        JTextField confirmField = new JTextField();
+
+        JPanel panel = new JPanel(new GridLayout(2, 1, 5, 5));
+        panel.add(new JLabel("Are you sure you want to register?\nPlease type \"CONFIRM\":"));
+        panel.add(confirmField);
+
+        int choice = JOptionPane.showConfirmDialog(
+            this,
+            panel,
+            "Confirm Registration",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (choice != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        // Step 3: Check CONFIRM text
+        if (!confirmField.getText().equals("CONFIRM")) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Confirmation failed.\nPlease type CONFIRM exactly.",
+                "Registration Cancelled",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+        
+        User user = new User(
+            jUserNameTextField.getText().trim(),
+            new String(jFirstPasswordTextField.getPassword()),
+            jRegistrationRoleComboBox.getSelectedItem().toString(),
+            jFirstNameTextField.getText().trim(),
+            jLastNameTextField.getText().trim(),
+            (ImageIcon) jProfileImageLabel.getIcon(),
+            LocalDate.now()
+        );
+        
+        AuthController.register(user);
+        CurrentUser.set(user);
+
+        // Step 4: Final success
+        showRegistrationSuccess();
+    }
+    
+    
+    private boolean hasUnsavedData() 
+    {
+
+        if (!jFirstNameTextField.getText().trim().isEmpty()) return true;
+        if (!jLastNameTextField.getText().trim().isEmpty()) return true;
+        if (!jEmailAddressTextField.getText().trim().isEmpty()) return true;
+        if (!jContactNumberTextField.getText().trim().isEmpty()) return true;
+        if (!jUserNameTextField.getText().trim().isEmpty()) return true;
+        if (jFirstPasswordTextField.getPassword().length > 0) return true;
+        if (jConfirmPasswordTextField.getPassword().length > 0) return true;
+        if (!jAddressTextArea.getText().trim().isEmpty()) return true;
+
+        // ComboBoxes (if changed from default)
+        if (jRegistrationRoleComboBox.getSelectedIndex() != 0) return true;
+        if (!jMonthComboBox.getSelectedItem().equals("Month")) return true;
+        if (!jDayComboBox.getSelectedItem().equals("Day")) return true;
+        if (!jYearComboBox.getSelectedItem().equals("Year")) return true;
+
+        return false;
     }
 
 
@@ -520,9 +699,217 @@ public class RegistrationInterface extends javax.swing.JFrame {
             public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
         });
     }
+    private void makeComboBoxDark(JComboBox<?> combo) 
+    {
+        combo.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
 
+            @Override
+            protected JButton createArrowButton() {
+                return new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                                            RenderingHints.VALUE_ANTIALIAS_ON);
 
+                        // background
+                        g2.setColor(new Color(21, 20, 20));
+                        g2.fillRect(0, 0, getWidth(), getHeight());
 
+                        // chevron arrow (V shape)
+                        g2.setStroke(new BasicStroke(2f));
+                        g2.setColor(new Color(170, 170, 170));
+
+                        int w = getWidth();
+                        int h = getHeight();
+
+                        int x1 = w / 2 - 6;
+                        int y1 = h / 2 - 2;
+                        int x2 = w / 2;
+                        int y2 = h / 2 + 4;
+                        int x3 = w / 2 + 6;
+                        int y3 = h / 2 - 2;
+
+                        g2.drawLine(x1, y1, x2, y2);
+                        g2.drawLine(x2, y2, x3, y3);
+
+                        g2.dispose();
+                    }
+                };
+            }
+
+            @Override
+            public void paintCurrentValueBackground(
+                    Graphics g,
+                    Rectangle bounds,
+                    boolean hasFocus) {
+
+                g.setColor(new Color(21, 20, 20));
+                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+        });
+
+        combo.setOpaque(false);
+        combo.setBackground(new Color(21, 20, 20));
+        combo.setForeground(new Color(170, 170, 170));
+    }
+    private Icon createCheckBoxIcon(boolean checked) {
+        return new Icon() {
+
+            private final int SIZE = 14;
+
+            @Override
+            public int getIconWidth() {
+                return SIZE;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return SIZE;
+            }
+
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Background (black)
+                g2.setColor(new Color(21, 20, 20));
+                g2.fillRoundRect(x, y, SIZE, SIZE, 4, 4);
+
+                // Border (gray)
+                g2.setColor(new Color(170, 170, 170));
+                g2.setStroke(new BasicStroke(1));
+                g2.drawRoundRect(x, y, SIZE - 1, SIZE - 1, 4, 4);
+
+                // Checkmark
+                if (checked) {
+                    g2.setStroke(new BasicStroke(2));
+                    g2.drawLine(x + 3, y + 7, x + 6, y + 10);
+                    g2.drawLine(x + 6, y + 10, x + 11, y + 3);
+                }
+
+                g2.dispose();
+            }
+        };
+    }
+
+    private void makeCheckBoxDark(JCheckBox checkBox) {
+        checkBox.setIcon(createCheckBoxIcon(false));
+        checkBox.setSelectedIcon(createCheckBoxIcon(true));
+
+        checkBox.setBackground(new Color(21, 20, 20));
+        checkBox.setForeground(new Color(170, 170, 170));
+
+        checkBox.setOpaque(false);
+        checkBox.setFocusPainted(false);
+        checkBox.setBorderPainted(false);
+    }
+    
+    private void addHoverEffect() {
+
+        final Color normalColor = new Color(30, 30, 30);
+        final Color hoverColor  = new Color(50, 50, 50);
+        final Color pressColor  = new Color(20, 20, 20);
+
+        // Register button
+        jRegistrationButton.setBackground(normalColor);
+        jRegistrationButton.setForeground(Color.WHITE);
+        jRegistrationButton.setFocusPainted(false);
+
+        jRegistrationButton.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                jRegistrationButton.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                jRegistrationButton.setBackground(normalColor);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                jRegistrationButton.setBackground(pressColor);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                jRegistrationButton.setBackground(hoverColor);
+            }
+        });
+
+        // Back button
+        jRegistrationBackButton.setBackground(normalColor);
+        jRegistrationBackButton.setForeground(Color.WHITE);
+        jRegistrationBackButton.setFocusPainted(false);
+
+        jRegistrationBackButton.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                jRegistrationBackButton.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                jRegistrationBackButton.setBackground(normalColor);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                jRegistrationBackButton.setBackground(pressColor);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                jRegistrationBackButton.setBackground(hoverColor);
+            }
+        });
+    }
+
+    private void loadUserForEdit()
+    {
+        if (editingUser == null) return;
+
+        // ===== BASIC =====
+        jUserNameTextField.setText(editingUser.getUsername());
+        jUserNameTextField.setEditable(false);
+
+        jFirstNameTextField.setText(editingUser.getFirstName());
+        jLastNameTextField.setText(editingUser.getLastName());
+        jEmailAddressTextField.setText(editingUser.getEmail());
+        jContactNumberTextField.setText(editingUser.getContactNumber());
+        jAddressTextArea.setText(editingUser.getAddress());
+
+        // ===== ROLE =====
+        jRegistrationRoleComboBox.setSelectedItem(editingUser.getRole());
+        jRegistrationRoleComboBox.setEnabled(false);
+
+        // ===== DOB =====
+        if (editingUser.getDob() != null) {
+            String[] parts = editingUser.getDob().split("-");
+            if (parts.length == 3) {
+                jMonthComboBox.setSelectedItem(parts[0]);
+                jDayComboBox.setSelectedItem(parts[1]);
+                jYearComboBox.setSelectedItem(parts[2]);
+            }
+        }
+
+        // ===== PROFILE IMAGE =====
+        if (editingUser.getProfileImage() != null) {
+            jProfileImageLabel.setIcon(editingUser.getProfileImage());
+            isCustomImageSelected = true;
+        }
+
+        // ===== UI TEXT =====
+        jRegistrationButton.setText("Update Profile");
+
+        // Passwords intentionally blank (security)
+        jFirstPasswordTextField.setText("");
+        jConfirmPasswordTextField.setText("");
+    }
 
 
 
@@ -565,8 +952,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jDayComboBox = new javax.swing.JComboBox<>();
         jYearComboBox = new javax.swing.JComboBox<>();
         jProfileImageLabel = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
 
         jPasswordField1.setText("jPasswordField1");
 
@@ -593,7 +979,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jRegistrationButton.addActionListener(this::jRegistrationButtonActionPerformed);
 
         jPanel3.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "First Name", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "First Name", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jFirstNameTextField.setBackground(new java.awt.Color(21, 20, 20));
         jFirstNameTextField.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
@@ -614,7 +1000,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         );
 
         jPanel4.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Contact Number", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Contact Number", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jContactNumberTextField.setBackground(new java.awt.Color(21, 20, 20));
         jContactNumberTextField.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
@@ -635,7 +1021,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         );
 
         jPanel5.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Last Name", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Last Name", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jLastNameTextField.setBackground(new java.awt.Color(21, 20, 20));
         jLastNameTextField.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
@@ -656,7 +1042,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         );
 
         jPanel6.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Email Address", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Email Address", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jEmailAddressTextField.setBackground(new java.awt.Color(21, 20, 20));
         jEmailAddressTextField.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
@@ -677,7 +1063,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         );
 
         jPanel7.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "User Name", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "User Name", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
         jPanel7.setPreferredSize(new java.awt.Dimension(157, 50));
 
         jUserNameTextField.setBackground(new java.awt.Color(21, 20, 20));
@@ -695,11 +1081,11 @@ public class RegistrationInterface extends javax.swing.JFrame {
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jUserNameTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+            .addComponent(jUserNameTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
         );
 
         jPanel9.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Password", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Password", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jFirstPasswordTextField.setBackground(new java.awt.Color(21, 20, 20));
         jFirstPasswordTextField.setForeground(new java.awt.Color(170, 170, 170));
@@ -718,7 +1104,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         );
 
         jPanel10.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Confirm Password", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Confirm Password", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jConfirmPasswordTextField.setBackground(new java.awt.Color(21, 20, 20));
         jConfirmPasswordTextField.setForeground(new java.awt.Color(170, 170, 170));
@@ -754,7 +1140,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jFirstPasswordCheckBox.addActionListener(this::jFirstPasswordCheckBoxActionPerformed);
 
         jPanel11.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Role", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Role", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
         jPanel11.setPreferredSize(new java.awt.Dimension(157, 50));
 
         jRegistrationRoleComboBox.setBackground(new java.awt.Color(21, 20, 20));
@@ -767,11 +1153,11 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jPanel11.setLayout(jPanel11Layout);
         jPanel11Layout.setHorizontalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jRegistrationRoleComboBox, 0, 151, Short.MAX_VALUE)
+            .addComponent(jRegistrationRoleComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, 151, Short.MAX_VALUE)
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jRegistrationRoleComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+            .addComponent(jRegistrationRoleComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
         );
 
         jConfirmPasswordCheckBox.setBackground(new java.awt.Color(21, 20, 20));
@@ -789,7 +1175,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jRegistrationBackButton.addActionListener(this::jRegistrationBackButtonActionPerformed);
 
         jPanel12.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Address", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Address", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
 
         jScrollPane1.setBorder(null);
 
@@ -814,7 +1200,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
         );
 
         jPanel13.setBackground(new java.awt.Color(21, 20, 20));
-        jPanel13.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Date of Birth", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
+        jPanel13.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Date of Birth", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
         jPanel13.setPreferredSize(new java.awt.Dimension(157, 50));
 
         jMonthComboBox.setBackground(new java.awt.Color(21, 20, 20));
@@ -842,12 +1228,11 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel13Layout.createSequentialGroup()
-                .addComponent(jMonthComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jDayComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jYearComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jMonthComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jDayComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jYearComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -865,17 +1250,10 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jProfileImageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jProfileImageLabel.setPreferredSize(new java.awt.Dimension(120, 120));
 
-        jTextField1.setBackground(new java.awt.Color(21, 20, 20));
-        jTextField1.setFont(new java.awt.Font("Iceberg", 0, 10)); // NOI18N
-        jTextField1.setForeground(new java.awt.Color(170, 170, 170));
-        jTextField1.setText("Alert Message");
-        jTextField1.setBorder(null);
-
-        jTextField2.setBackground(new java.awt.Color(21, 20, 20));
-        jTextField2.setFont(new java.awt.Font("Iceberg", 0, 10)); // NOI18N
-        jTextField2.setForeground(new java.awt.Color(170, 170, 170));
-        jTextField2.setText("Alert Message");
-        jTextField2.setBorder(null);
+        jLabel4.setBackground(new java.awt.Color(53, 54, 55));
+        jLabel4.setFont(new java.awt.Font("Iceberg", 1, 12)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(170, 170, 170));
+        jLabel4.setText("Profile Picture");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -906,20 +1284,15 @@ public class RegistrationInterface extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(jPanel2Layout.createSequentialGroup()
-                                    .addComponent(jConfirmPasswordCheckBox)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(jPanel2Layout.createSequentialGroup()
-                                    .addComponent(jFirstPasswordCheckBox)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jConfirmPasswordCheckBox, javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jFirstPasswordCheckBox, javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jPanel10, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(jPanel2Layout.createSequentialGroup()
                                     .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(28, 28, 28))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(109, 109, 109)
@@ -932,7 +1305,9 @@ public class RegistrationInterface extends javax.swing.JFrame {
                 .addGap(23, 23, 23)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
@@ -944,7 +1319,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jProfileImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(15, 15, 15)
+                .addGap(16, 16, 16)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -958,16 +1333,12 @@ public class RegistrationInterface extends javax.swing.JFrame {
                             .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(6, 6, 6)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jFirstPasswordCheckBox)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(6, 6, 6)
+                        .addGap(7, 7, 7)
+                        .addComponent(jFirstPasswordCheckBox)
+                        .addGap(7, 7, 7)
                         .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jConfirmPasswordCheckBox)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(jConfirmPasswordCheckBox)))
                 .addGap(30, 30, 30)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jRegistrationButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -987,9 +1358,9 @@ public class RegistrationInterface extends javax.swing.JFrame {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(34, 34, 34)
+                .addGap(27, 27, 27)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -1009,7 +1380,57 @@ public class RegistrationInterface extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jRegistrationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRegistrationButtonActionPerformed
-        
+        String firstName = jFirstNameTextField.getText().trim();
+        String lastName  = jLastNameTextField.getText().trim();
+        String password  = new String(jFirstPasswordTextField.getPassword()).trim();
+
+        if (firstName.isEmpty() || lastName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "First and Last name required");
+            return;
+        }
+
+        // ================= EDIT MODE =================
+        if (editingUser != null) {
+
+            editingUser.setFirstName(firstName);
+            editingUser.setLastName(lastName);
+
+            if (!password.isEmpty()) {
+                editingUser.setPassword(password);
+            }
+
+            if (jProfileImageLabel.getIcon() != null) {
+                editingUser.setProfileImage(
+                    (ImageIcon) jProfileImageLabel.getIcon()
+                );
+            }
+
+            AuthController.saveUsers();   // 🔥 SAVE UPDATED USER
+
+            JOptionPane.showMessageDialog(this, "Profile updated successfully");
+
+            new Interface().setVisible(true);
+            dispose();
+            return;
+        }
+
+        // ================= NEW REGISTRATION =================
+        User newUser = new User(
+            jUserNameTextField.getText().trim(),
+            password,
+            "User",
+            firstName,
+            lastName,
+            (ImageIcon) jProfileImageLabel.getIcon(),
+            java.time.LocalDate.now()
+        );
+
+        AuthController.register(newUser);
+
+        JOptionPane.showMessageDialog(this, "Registration successful");
+
+        new LoginInterface().setVisible(true);
+        dispose();
     }//GEN-LAST:event_jRegistrationButtonActionPerformed
 
     private void jFirstNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFirstNameTextFieldActionPerformed
@@ -1095,6 +1516,7 @@ public class RegistrationInterface extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JTextField jLastNameTextField;
     private javax.swing.JComboBox<String> jMonthComboBox;
     private javax.swing.JPanel jPanel1;
@@ -1115,8 +1537,6 @@ public class RegistrationInterface extends javax.swing.JFrame {
     private javax.swing.JButton jRegistrationButton;
     private javax.swing.JComboBox<String> jRegistrationRoleComboBox;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jUserNameTextField;
     private javax.swing.JComboBox<String> jYearComboBox;
     // End of variables declaration//GEN-END:variables

@@ -66,9 +66,9 @@ public class LoginInterface extends javax.swing.JFrame {
     public class RoundedButton extends JButton 
     {
         final int radius = 30;
-        final Color normalColor = new Color(30,30,30);
-        final Color hoverColor = new Color(50,50,50);
-        final Color pressColor = new Color(30,30,30);
+        final Color normalColor = new Color(30, 30, 30);
+        final Color hoverColor  = new Color(50, 50, 50);
+        final Color pressColor  = new Color(20, 20, 20);
 
         public RoundedButton(String text) 
         {
@@ -169,6 +169,8 @@ public class LoginInterface extends javax.swing.JFrame {
             super.paintComponent(g);
         }
     }
+
+
 
 
 
