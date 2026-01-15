@@ -711,10 +711,9 @@ public class AdminInterface extends javax.swing.JFrame
         jDashboardPanelAdmin = new GradientPanelDark() ;
         jLabel4 = new javax.swing.JLabel();
         jPanel9 = new GradientPanelDark() ;
-        jUndoButtonAdmin = new javax.swing.JButton();
-        jSortComboBoxAdmin = new javax.swing.JComboBox<>();
-        jSortButtonAdmin = new javax.swing.JButton();
         jAscendDesendComboBoxAdmin = new javax.swing.JComboBox<>();
+        jTextField1 = new javax.swing.JTextField();
+        jSortButtonAdmin1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jDashboardTableAdmin = new javax.swing.JTable();
         jDashboardTableAdmin.setFillsViewportHeight(true);
@@ -724,6 +723,9 @@ public class AdminInterface extends javax.swing.JFrame
         ;
         jUpdateRecord = new RoundedButton("Button Text")
         ;
+        jSortButtonAdmin = new javax.swing.JButton();
+        jUndoButtonAdmin = new javax.swing.JButton();
+        jSortComboBoxAdmin = new javax.swing.JComboBox<>();
         jAddRecordPanelAdmin = new GradientPanelDark();
         jLabel6 = new javax.swing.JLabel();
         jPanel4 = new GradientPanelSoft();
@@ -893,30 +895,20 @@ public class AdminInterface extends javax.swing.JFrame
         jPanel9.setBackground(new java.awt.Color(21, 20, 20));
         jPanel9.setPreferredSize(new java.awt.Dimension(1005, 70));
 
-        jUndoButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
-        jUndoButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jUndoButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
-        jUndoButtonAdmin.setText("Undo");
-        jUndoButtonAdmin.setBorder(null);
-        jUndoButtonAdmin.addActionListener(this::jUndoButtonAdminActionPerformed);
-
-        jSortComboBoxAdmin.setBackground(new java.awt.Color(53, 54, 55));
-        jSortComboBoxAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jSortComboBoxAdmin.setForeground(new java.awt.Color(170, 170, 170));
-        jSortComboBoxAdmin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Default Sort", "Sort By Name", "Sort By ID", "Sort By Amount" }));
-        jSortComboBoxAdmin.setBorder(null);
-        jSortComboBoxAdmin.addActionListener(this::jSortComboBoxAdminActionPerformed);
-
-        jSortButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
-        jSortButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jSortButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
-        jSortButtonAdmin.setText("Sort");
-        jSortButtonAdmin.setBorder(null);
-
         jAscendDesendComboBoxAdmin.setBackground(new java.awt.Color(53, 54, 55));
         jAscendDesendComboBoxAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
         jAscendDesendComboBoxAdmin.setForeground(new java.awt.Color(170, 170, 170));
-        jAscendDesendComboBoxAdmin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Default", "Asending", "Descending" }));
+        jAscendDesendComboBoxAdmin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Asending", "Descending" }));
+        jAscendDesendComboBoxAdmin.setBorder(null);
+
+        jTextField1.setBackground(new java.awt.Color(53, 54, 55));
+        jTextField1.setBorder(null);
+
+        jSortButtonAdmin1.setBackground(new java.awt.Color(53, 54, 55));
+        jSortButtonAdmin1.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jSortButtonAdmin1.setForeground(new java.awt.Color(170, 170, 170));
+        jSortButtonAdmin1.setText("Search");
+        jSortButtonAdmin1.setBorder(null);
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
@@ -924,25 +916,21 @@ public class AdminInterface extends javax.swing.JFrame
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jAscendDesendComboBoxAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
-                .addComponent(jSortButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(38, 38, 38)
+                .addComponent(jAscendDesendComboBoxAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jSortComboBoxAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jSortButtonAdmin1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addGap(22, 22, 22)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                .addContainerGap(34, Short.MAX_VALUE)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
-                    .addComponent(jSortComboBoxAdmin)
-                    .addComponent(jSortButtonAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jAscendDesendComboBoxAdmin))
-                .addContainerGap(17, Short.MAX_VALUE))
+                    .addComponent(jSortButtonAdmin1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                    .addComponent(jAscendDesendComboBoxAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jDashboardTableAdmin.setBackground(new java.awt.Color(43, 46, 51));
@@ -990,22 +978,51 @@ public class AdminInterface extends javax.swing.JFrame
         jUpdateRecord.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jUpdateRecord.addActionListener(this::jUpdateRecordActionPerformed);
 
+        jSortButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
+        jSortButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jSortButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jSortButtonAdmin.setText("Sort");
+        jSortButtonAdmin.setBorder(null);
+
+        jUndoButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
+        jUndoButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jUndoButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jUndoButtonAdmin.setText("Undo");
+        jUndoButtonAdmin.setBorder(null);
+        jUndoButtonAdmin.addActionListener(this::jUndoButtonAdminActionPerformed);
+
+        jSortComboBoxAdmin.setBackground(new java.awt.Color(53, 54, 55));
+        jSortComboBoxAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jSortComboBoxAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jSortComboBoxAdmin.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None Sort", "Sort By Name", "Sort By ID", "Sort By Amount" }));
+        jSortComboBoxAdmin.setBorder(null);
+        jSortComboBoxAdmin.addActionListener(this::jSortComboBoxAdminActionPerformed);
+
         javax.swing.GroupLayout jDashboardPanelAdminLayout = new javax.swing.GroupLayout(jDashboardPanelAdmin);
         jDashboardPanelAdmin.setLayout(jDashboardPanelAdminLayout);
         jDashboardPanelAdminLayout.setHorizontalGroup(
             jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jDashboardPanelAdminLayout.createSequentialGroup()
-                .addGap(22, 22, 22)
                 .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jDashboardPanelAdminLayout.createSequentialGroup()
-                        .addComponent(jAddRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37)
-                        .addComponent(jDeleteRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
-                        .addComponent(jUpdateRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jDashboardPanelAdminLayout.createSequentialGroup()
+                        .addGap(22, 22, 22)
+                        .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1)
+                            .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 1006, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jDashboardPanelAdminLayout.createSequentialGroup()
+                                .addComponent(jAddRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(37, 37, 37)
+                                .addComponent(jDeleteRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                                .addComponent(jUpdateRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jDashboardPanelAdminLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(38, 38, 38)
+                        .addComponent(jSortComboBoxAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jSortButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(26, 26, 26))
         );
         jDashboardPanelAdminLayout.setVerticalGroup(
@@ -1017,11 +1034,16 @@ public class AdminInterface extends javax.swing.JFrame
                     .addComponent(jAddRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jDeleteRecordButton, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jUpdateRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(69, 69, 69))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jDashboardPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jSortComboBoxAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jSortButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jUndoButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(36, 36, 36)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(100, 100, 100))
         );
 
         jParentPanel.add(jDashboardPanelAdmin, "card9");
@@ -1233,7 +1255,7 @@ public class AdminInterface extends javax.swing.JFrame
                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 608, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(51, Short.MAX_VALUE))
+                .addContainerGap(91, Short.MAX_VALUE))
         );
 
         jParentPanel.add(jAddRecordPanelAdmin, "card7");
@@ -1364,12 +1386,12 @@ public class AdminInterface extends javax.swing.JFrame
             jDeleteRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jDeleteRecordPanelAdminLayout.createSequentialGroup()
                 .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 665, Short.MAX_VALUE))
+                .addGap(0, 705, Short.MAX_VALUE))
             .addGroup(jDeleteRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jDeleteRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(81, 81, 81)
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(87, Short.MAX_VALUE)))
+                    .addContainerGap(127, Short.MAX_VALUE)))
         );
 
         jParentPanel.add(jDeleteRecordPanelAdmin, "card2");
@@ -1490,7 +1512,7 @@ public class AdminInterface extends javax.swing.JFrame
                 .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 78, Short.MAX_VALUE))
+                .addGap(0, 118, Short.MAX_VALUE))
         );
 
         jParentPanel.add(jUpdateRecordPanelAdmin, "card3");
@@ -1712,12 +1734,12 @@ public class AdminInterface extends javax.swing.JFrame
             jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jActualUpdateRecordPanelAdminLayout.createSequentialGroup()
                 .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 665, Short.MAX_VALUE))
+                .addGap(0, 705, Short.MAX_VALUE))
             .addGroup(jActualUpdateRecordPanelAdminLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jActualUpdateRecordPanelAdminLayout.createSequentialGroup()
                     .addGap(81, 81, 81)
                     .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 622, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(40, Short.MAX_VALUE)))
+                    .addContainerGap(80, Short.MAX_VALUE)))
         );
 
         jParentPanel.add(jActualUpdateRecordPanelAdmin, "card6");
@@ -2114,7 +2136,9 @@ public class AdminInterface extends javax.swing.JFrame
     private javax.swing.JPanel jParentPanel;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton jSortButtonAdmin;
+    private javax.swing.JButton jSortButtonAdmin1;
     private javax.swing.JComboBox<String> jSortComboBoxAdmin;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextFieldDeleteID;
     private javax.swing.JButton jUndoButtonAdmin;
     private javax.swing.JTextField jUpdateFieldAmount;

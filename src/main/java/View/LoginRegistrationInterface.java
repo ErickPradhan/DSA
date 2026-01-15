@@ -10,19 +10,19 @@ import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
 
 
-public class Main extends javax.swing.JFrame {
+public class LoginRegistrationInterface extends javax.swing.JFrame {
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Main.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LoginRegistrationInterface.class.getName());
 
     /**
      * Creates new form RoleSelectionFrame
      */
-    public Main() 
+    public LoginRegistrationInterface() 
     {
         initComponents();
         setLocationRelativeTo(null);   //Centers window
         //Admin Logo Button
-        ImageIcon adminIcon = new ImageIcon(getClass().getResource("/logo/AdminLogo.png"));
+        ImageIcon adminIcon = new ImageIcon(getClass().getResource("/logo/RegistrationLogo.png"));
         Image adminImg = adminIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         jLoginButtonAdmin.setIcon(new ImageIcon(adminImg));
 
@@ -30,7 +30,7 @@ public class Main extends javax.swing.JFrame {
         jLoginButtonAdmin.setVerticalTextPosition(SwingConstants.BOTTOM);
         jLoginButtonAdmin.setIconTextGap(5);
         //User Logo Button
-        ImageIcon userIcon = new ImageIcon(getClass().getResource("/logo/UserLogo.png"));
+        ImageIcon userIcon = new ImageIcon(getClass().getResource("/logo/LoginLogo.png"));
         Image userImg = userIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
         jLoginButtonUser.setIcon(new ImageIcon(userImg));
 
@@ -210,14 +210,14 @@ public class Main extends javax.swing.JFrame {
         jLoginButtonAdmin.setBackground(new java.awt.Color(53, 54, 55));
         jLoginButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
         jLoginButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
-        jLoginButtonAdmin.setText("Admin");
+        jLoginButtonAdmin.setText("Register");
         jLoginButtonAdmin.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jLoginButtonAdmin.addActionListener(this::jLoginButtonAdminActionPerformed);
 
         jLoginButtonUser.setBackground(new java.awt.Color(53, 54, 55));
         jLoginButtonUser.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
         jLoginButtonUser.setForeground(new java.awt.Color(170, 170, 170));
-        jLoginButtonUser.setText("User");
+        jLoginButtonUser.setText("Login");
         jLoginButtonUser.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jLoginButtonUser.addActionListener(this::jLoginButtonUserActionPerformed);
 
@@ -286,16 +286,13 @@ public class Main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jLoginButtonAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonAdminActionPerformed
-    AsAdminRole admin = new AsAdminRole();
-    admin.setVisible(true);
-    this.dispose();   // closes current frame (optional)
+    new RegistrationInterface().setVisible(true);
+    dispose();
     }//GEN-LAST:event_jLoginButtonAdminActionPerformed
 
     private void jLoginButtonUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonUserActionPerformed
-    AsUserRole user = new AsUserRole();
-    user.setVisible(true);
-    this.dispose();   // optional: closes current window
-
+    new LoginInterface().setVisible(true);
+    dispose();
     }//GEN-LAST:event_jLoginButtonUserActionPerformed
 
     /**
@@ -320,7 +317,7 @@ public class Main extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new Main().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new LoginRegistrationInterface().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

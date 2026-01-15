@@ -3,27 +3,28 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package View;
-import Controller.AuthController;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
+import Controller.AuthController;
+
 
 /**
  *
  * @author erick
  */
-public class AsUserRole extends javax.swing.JFrame {
+public class AdminLoginInterface extends javax.swing.JFrame {
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AsUserRole.class.getName());
-
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(AdminLoginInterface.class.getName());
+    
     private int loginAttempts = 0;
     private boolean isLocked = false;
     /**
      * Creates new form RoleSelectionFrame
      */
-    public AsUserRole() 
+    public AdminLoginInterface() 
     {
         initComponents();
         setLocationRelativeTo(null);   //Centers window
@@ -48,19 +49,19 @@ public class AsUserRole extends javax.swing.JFrame {
         }
         
         // Makes ENTER key trigger Login button
-        getRootPane().setDefaultButton(jLoginButtonUser);
+        getRootPane().setDefaultButton(jLoginButtonAdmin);
 
-        jUsernameTextFieldUser.requestFocusInWindow();
+        jUsernameTextFieldAdmin.requestFocusInWindow();
 
-        jUsernameTextFieldUser.addActionListener(e -> jLoginButtonUser.doClick());
-        jPasswordTextFieldUser.addActionListener(e -> jLoginButtonUser.doClick());
+        jUsernameTextFieldAdmin.addActionListener(e -> jLoginButtonAdmin.doClick());
+        jPasswordTextFieldAdmin.addActionListener(e -> jLoginButtonAdmin.doClick());
 
     
         //Action Listener
-        jLoginButtonUser.addActionListener(e ->
+        jLoginButtonAdmin.addActionListener(e ->
         {
-            String user = jUsernameTextFieldUser.getText().trim();
-            String pass = new String(jPasswordTextFieldUser.getPassword()).trim();
+            String user = jUsernameTextFieldAdmin.getText().trim();
+            String pass = new String(jPasswordTextFieldAdmin.getPassword()).trim();
 
             // === EMPTY FIELD VALIDATION ===
             if(user.isEmpty() && pass.isEmpty())
@@ -83,45 +84,46 @@ public class AsUserRole extends javax.swing.JFrame {
                         "Please enter your Password!");
                 return;
             }
-            String result = AuthController.login(user, pass, "user");
+            String result = AuthController.login(user, pass, "admin");
 
             switch (result)
             {
                 case "SUCCESS":
                     loginAttempts = 0;
                     isLocked = false;
-                    JOptionPane.showMessageDialog(this,"User Login Successful!");
+                    JOptionPane.showMessageDialog(this,"Admin Login Successful!");
                     new AdminInterface().setVisible(true);
                     dispose();
                     break;
 
                 case "WRONG_USERNAME":
-                    JOptionPane.showMessageDialog(this,"Invalid User's Username!");
+                    JOptionPane.showMessageDialog(this,"Invalid Admin's Username!");
                     loginAttempts++;
                     checkAttempts();
                     break;
 
                 case "WRONG_PASSWORD":
-                    JOptionPane.showMessageDialog(this,"Your password is incorrect, Please try again!");
+                    JOptionPane.showMessageDialog(this,"Your password is incorrect, please try again!");
                     loginAttempts++;
                     checkAttempts();
                     break;
 
                 case "BOTH_WRONG":
-                    JOptionPane.showMessageDialog(this,"Invalid credentials, Please try again!");
+                    JOptionPane.showMessageDialog(this,"Invalid credentials, please try again!");
                     loginAttempts++;
                     checkAttempts();
                     break;
             }
         });
     }
+    
     private void checkAttempts()
     {
         if(loginAttempts < 5 || isLocked)
             return;
 
         isLocked = true;
-        jLoginButtonUser.setEnabled(false);
+        jLoginButtonAdmin.setEnabled(false);
 
         int lockSeconds = 30;
 
@@ -136,7 +138,6 @@ public class AsUserRole extends javax.swing.JFrame {
                 errorIcon,
                 SwingConstants.LEFT
         ); 
-        //Iceberg Font:
         try {
             Font iceberg = Font.createFont(
                     Font.TRUETYPE_FONT,
@@ -147,6 +148,7 @@ public class AsUserRole extends javax.swing.JFrame {
         } catch (Exception ex) {
             label.setFont(new Font("Arial", Font.PLAIN, 16)); // fallback
         }
+
         label.setHorizontalAlignment(SwingConstants.CENTER);
 
         panel.add(label, BorderLayout.CENTER);
@@ -169,7 +171,7 @@ public class AsUserRole extends javax.swing.JFrame {
                 if(timeLeft <= 0){
                     ((javax.swing.Timer)e.getSource()).stop();
                     dialog.dispose();
-                    jLoginButtonUser.setEnabled(true);
+                    jLoginButtonAdmin.setEnabled(true);
                     loginAttempts = 0;
                     isLocked = false;
                 }
@@ -178,6 +180,7 @@ public class AsUserRole extends javax.swing.JFrame {
 
         dialog.setVisible(true);
     }
+
     
     //Components
     public class RoundedPanel extends JPanel 
@@ -257,11 +260,12 @@ public class AsUserRole extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new RoundedPanel(30);
         jLabel2 = new javax.swing.JLabel();
-        jLoginButtonUser = new RoundedButton("Button Text") ;
+        jLoginButtonAdmin = new RoundedButton("Button Text") ;
         jPanel3 = new javax.swing.JPanel();
-        jUsernameTextFieldUser = new javax.swing.JTextField();
+        jUsernameTextFieldAdmin = new javax.swing.JTextField();
         jPanel4 = new javax.swing.JPanel();
-        jPasswordTextFieldUser = new javax.swing.JPasswordField();
+        jPasswordTextFieldAdmin = new javax.swing.JPasswordField();
+        jLoginButtonAdmin1 = new RoundedButton("Button Text") ;
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -275,53 +279,61 @@ public class AsUserRole extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Iceberg", 0, 24)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(170, 170, 170));
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Login as User");
+        jLabel2.setText("Login as Admin");
 
-        jLoginButtonUser.setBackground(new java.awt.Color(71, 71, 71));
-        jLoginButtonUser.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
-        jLoginButtonUser.setForeground(new java.awt.Color(170, 170, 170));
-        jLoginButtonUser.setText("Login");
-        jLoginButtonUser.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jLoginButtonUser.addActionListener(this::jLoginButtonUserActionPerformed);
+        jLoginButtonAdmin.setBackground(new java.awt.Color(71, 71, 71));
+        jLoginButtonAdmin.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jLoginButtonAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jLoginButtonAdmin.setText("Login");
+        jLoginButtonAdmin.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLoginButtonAdmin.addActionListener(this::jLoginButtonAdminActionPerformed);
 
         jPanel3.setBackground(new java.awt.Color(21, 20, 20));
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Username", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
 
-        jUsernameTextFieldUser.setBackground(new java.awt.Color(21, 20, 20));
-        jUsernameTextFieldUser.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
-        jUsernameTextFieldUser.setForeground(new java.awt.Color(170, 170, 170));
-        jUsernameTextFieldUser.setBorder(null);
-        jUsernameTextFieldUser.setPreferredSize(new java.awt.Dimension(65, 15));
-        jUsernameTextFieldUser.addActionListener(this::jUsernameTextFieldUserActionPerformed);
+        jUsernameTextFieldAdmin.setBackground(new java.awt.Color(21, 20, 20));
+        jUsernameTextFieldAdmin.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jUsernameTextFieldAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jUsernameTextFieldAdmin.setBorder(null);
+        jUsernameTextFieldAdmin.setPreferredSize(new java.awt.Dimension(65, 15));
+        jUsernameTextFieldAdmin.addActionListener(this::jUsernameTextFieldAdminActionPerformed);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jUsernameTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+            .addComponent(jUsernameTextFieldAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jUsernameTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+            .addComponent(jUsernameTextFieldAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
         );
 
         jPanel4.setBackground(new java.awt.Color(21, 20, 20));
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Password", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 14), new java.awt.Color(170, 170, 170))); // NOI18N
 
-        jPasswordTextFieldUser.setBackground(new java.awt.Color(21, 20, 20));
-        jPasswordTextFieldUser.setForeground(new java.awt.Color(170, 170, 170));
-        jPasswordTextFieldUser.setBorder(null);
+        jPasswordTextFieldAdmin.setBackground(new java.awt.Color(21, 20, 20));
+        jPasswordTextFieldAdmin.setForeground(new java.awt.Color(170, 170, 170));
+        jPasswordTextFieldAdmin.setBorder(null);
+        jPasswordTextFieldAdmin.addActionListener(this::jPasswordTextFieldAdminActionPerformed);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+            .addComponent(jPasswordTextFieldAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPasswordTextFieldUser, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+            .addComponent(jPasswordTextFieldAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
         );
+
+        jLoginButtonAdmin1.setBackground(new java.awt.Color(71, 71, 71));
+        jLoginButtonAdmin1.setFont(new java.awt.Font("Iceberg", 0, 18)); // NOI18N
+        jLoginButtonAdmin1.setForeground(new java.awt.Color(170, 170, 170));
+        jLoginButtonAdmin1.setText("Back");
+        jLoginButtonAdmin1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLoginButtonAdmin1.addActionListener(this::jLoginButtonAdmin1ActionPerformed);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -331,18 +343,18 @@ public class AsUserRole extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(22, 22, 22)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 17, Short.MAX_VALUE)))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLoginButtonAdmin1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLoginButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jLoginButtonUser, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(98, 98, 98))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -353,9 +365,11 @@ public class AsUserRole extends javax.swing.JFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(29, 29, 29)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(38, 38, 38)
-                .addComponent(jLoginButtonUser, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30))
+                .addGap(40, 40, 40)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLoginButtonAdmin, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLoginButtonAdmin1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(28, 28, 28))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -389,13 +403,22 @@ public class AsUserRole extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jLoginButtonUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonUserActionPerformed
+    private void jLoginButtonAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonAdminActionPerformed
 
-    }//GEN-LAST:event_jLoginButtonUserActionPerformed
+    }//GEN-LAST:event_jLoginButtonAdminActionPerformed
 
-    private void jUsernameTextFieldUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUsernameTextFieldUserActionPerformed
+    private void jUsernameTextFieldAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUsernameTextFieldAdminActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jUsernameTextFieldUserActionPerformed
+    }//GEN-LAST:event_jUsernameTextFieldAdminActionPerformed
+
+    private void jPasswordTextFieldAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jPasswordTextFieldAdminActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jPasswordTextFieldAdminActionPerformed
+
+    private void jLoginButtonAdmin1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonAdmin1ActionPerformed
+        new LoginRegistrationInterface().setVisible(true);
+        dispose();
+    }//GEN-LAST:event_jLoginButtonAdmin1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -419,17 +442,18 @@ public class AsUserRole extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new AsUserRole().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new AdminLoginInterface().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JButton jLoginButtonUser;
+    private javax.swing.JButton jLoginButtonAdmin;
+    private javax.swing.JButton jLoginButtonAdmin1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPasswordField jPasswordTextFieldUser;
-    private javax.swing.JTextField jUsernameTextFieldUser;
+    private javax.swing.JPasswordField jPasswordTextFieldAdmin;
+    private javax.swing.JTextField jUsernameTextFieldAdmin;
     // End of variables declaration//GEN-END:variables
 }
