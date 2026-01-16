@@ -41,7 +41,8 @@ public class ExpenseController
             String amountText,
             String contact,
             String date
-    ) {
+    ) 
+    {
         StringBuilder errors = new StringBuilder();
         int id = 0;
         double amount = 0;
@@ -60,13 +61,19 @@ public class ExpenseController
         if (title.isEmpty())
             errors.append("• Expense title cannot be empty.\n");
 
-        try {
+        try 
+        {
             amount = Double.parseDouble(amountText);
-            if (amount <= 0)
+
+            if (amount < 0)
+                errors.append("• Amount cannot be negative.\n");
+            else if (amount == 0)
                 errors.append("• Amount must be greater than 0.\n");
+
         } catch (Exception e) {
             errors.append("• Amount must be numeric.\n");
         }
+
 
         if (!contact.matches("\\d{10}"))
             errors.append("• Contact must be exactly 10 digits.\n");
@@ -99,6 +106,33 @@ public class ExpenseController
         }
         return null;
     }
+    // ===================== BINARY SEARCH =====================
+    public static ExpenseModel binarySearchById(int id) 
+    {
+
+        // IMPORTANT: list must be sorted by ID before binary search
+        ExpenseSortController.BubbleSortById(expenses);
+
+        int left = 0;
+        int right = expenses.size() - 1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            ExpenseModel midExpense = expenses.get(mid);
+
+            if (midExpense.getId() == id) {
+                return midExpense;
+            }
+
+            if (midExpense.getId() < id) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return null;
+    }
+
 
 
     // ===================== DELETE =====================
@@ -178,4 +212,5 @@ public class ExpenseController
 
         return "SUCCESS";
     }
+    
 }

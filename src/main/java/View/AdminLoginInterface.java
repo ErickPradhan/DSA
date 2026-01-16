@@ -30,6 +30,7 @@ public class AdminLoginInterface extends javax.swing.JFrame {
     {
         initComponents();
         setLocationRelativeTo(null);   //Centers window
+        
         //Iceberg Font
         try 
         {
@@ -375,7 +376,7 @@ public class AdminLoginInterface extends javax.swing.JFrame {
 
             JOptionPane.showMessageDialog(this, "Admin Login Successful!");
 
-            new Interface().setVisible(true);
+            new AdminInterface().setVisible(true);
             dispose();
             break;
 

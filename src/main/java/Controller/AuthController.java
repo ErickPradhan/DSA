@@ -20,58 +20,46 @@ public class AuthController {
         loadUsers();
     }
 
-   // ================= LOGIN =================
+    // ================= LOGIN =================
     public static String login(String username, String password, String role) {
 
-        if (role.equalsIgnoreCase("admin")) {
+        // ================= HARDCODED ADMIN =================
+        if (role.equalsIgnoreCase("admin")
+                && username.equals("admin")
+                && password.equals("admin123")) {
+            return "SUCCESS";
+        }
 
-            for (User u : users) {
-                if (u.getUsername().equalsIgnoreCase(username)) {
+        // ================= HARDCODED USER =================
+        if (role.equalsIgnoreCase("user")
+                && username.equals("user")
+                && password.equals("user123")) {
+            return "SUCCESS";
+        }
 
-                    if (!u.getRole().equalsIgnoreCase("Admin")) {
-                        return "WRONG_USERNAME";
-                    }
+        // ================= CHECK REGISTERED USERS =================
+        for (User u : users) {
 
-                    if (!u.getPassword().equals(password)) {
-                        return "WRONG_PASSWORD";
-                    }
+            // username match
+            if (u.getUsername().equalsIgnoreCase(username)) {
 
-                    return "SUCCESS";
+                // role mismatch
+                if (!u.getRole().equalsIgnoreCase(role.trim())) {
+                    return "WRONG_USERNAME";
                 }
-            }
 
-            // fallback admin
-            if (username.equals("admin") && password.equals("admin123")) {
+                // password mismatch
+                if (!u.getPassword().equals(password)) {
+                    return "WRONG_PASSWORD";
+                }
+
                 return "SUCCESS";
             }
-
-            return "WRONG_USERNAME";
         }
 
-        if (role.equalsIgnoreCase("user")) {
-
-            for (User u : users) {
-                if (u.getUsername().equalsIgnoreCase(username)) {
-
-                    if (!u.getRole().equalsIgnoreCase("User")) {
-                        return "WRONG_USERNAME";
-                    }
-
-                    if (!u.getPassword().equals(password)) {
-                        return "WRONG_PASSWORD";
-                    }
-
-                    return "SUCCESS";
-                }
-            }
-
-            return "WRONG_USERNAME";
-        }
-
-        return "BOTH_WRONG";
+        // username not found
+        return "WRONG_USERNAME";
     }
-
-
 
     // ================= REGISTER =================
     public static void register(User user) 
@@ -127,5 +115,19 @@ public class AuthController {
         }
         return null;
     }
+    
+    public static ArrayList<User> getAllUsers() {
+        return users;
+    }
+    
+    public static void deleteUserByUsername(String username) {
+
+        users.removeIf(
+            u -> u.getUsername().equalsIgnoreCase(username)
+        );
+
+        saveUsers();
+    }
+
 
 }

@@ -29,6 +29,7 @@ public class UserLoginInterface extends javax.swing.JFrame {
     {
         initComponents();
         setLocationRelativeTo(null);   //Centers window
+        
         //Iceberg Font
         try 
         {
@@ -56,72 +57,6 @@ public class UserLoginInterface extends javax.swing.JFrame {
 
         jUsernameTextFieldUser.addActionListener(e -> jLoginButtonUser.doClick());
         jPasswordTextFieldUser.addActionListener(e -> jLoginButtonUser.doClick());
-
-    
-        //Action Listener
-        jLoginButtonUser.addActionListener(e ->
-        {
-            String user = jUsernameTextFieldUser.getText().trim();
-            String pass = new String(jPasswordTextFieldUser.getPassword()).trim();
-
-            // === EMPTY FIELD VALIDATION ===
-            if(user.isEmpty() && pass.isEmpty())
-            {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter your Username and Password!");
-                return;
-            }
-
-            if(user.isEmpty())
-            {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter your Username!");
-                return;
-            }
-
-            if(pass.isEmpty())
-            {
-                JOptionPane.showMessageDialog(this,
-                        "Please enter your Password!");
-                return;
-            }
-            String result = AuthController.login(user, pass, "user");
-
-            switch (result)
-            {
-                case "SUCCESS":
-                    loginAttempts = 0;
-                    isLocked = false;
-                    
-                    JOptionPane.showMessageDialog(this,"User Login Successful!");
-                    
-                    User loggedInUser = AuthController.getUserByUsername(user);
-                    CurrentUser.set(loggedInUser);
-
-                    
-                    new Interface().setVisible(true);
-                    dispose();
-                    break;
-
-                case "WRONG_USERNAME":
-                    JOptionPane.showMessageDialog(this,"Invalid User's Username!");
-                    loginAttempts++;
-                    checkAttempts();
-                    break;
-
-                case "WRONG_PASSWORD":
-                    JOptionPane.showMessageDialog(this,"Your password is incorrect, Please try again!");
-                    loginAttempts++;
-                    checkAttempts();
-                    break;
-
-                case "BOTH_WRONG":
-                    JOptionPane.showMessageDialog(this,"Invalid credentials, Please try again!");
-                    loginAttempts++;
-                    checkAttempts();
-                    break;
-            }
-        });
     }
     private void checkAttempts()
     {
@@ -408,7 +343,67 @@ public class UserLoginInterface extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jLoginButtonUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jLoginButtonUserActionPerformed
+    String username = jUsernameTextFieldUser.getText().trim();
+    String password = new String(jPasswordTextFieldUser.getPassword()).trim();
 
+    String result = AuthController.login(username, password, "user");
+
+    switch (result) {
+
+        case "SUCCESS": {
+
+            // 🔑 Get full user object
+            User user = AuthController.getUserByUsername(username);
+
+            // 🔒 Hardcoded USER fallback (same pattern as admin)
+            if (user == null) {
+                ImageIcon icon = new ImageIcon(
+                    getClass().getResource("/logo/UserLogo.png")
+            );
+            Image img = icon.getImage().getScaledInstance(
+                    120, 120, Image.SCALE_SMOOTH
+            );
+            icon = new ImageIcon(img);
+
+            user = new User(
+                "user",
+                "user123",
+                "User",
+                "User",
+                "",
+                icon,
+                java.time.LocalDate.now()
+            );
+
+            }
+
+            CurrentUser.set(user);
+
+            JOptionPane.showMessageDialog(this, "User Login Successful!");
+
+            // ✅ OPEN USER DASHBOARD (NOT ADMIN)
+            new UserInterface().setVisible(true);
+            dispose();
+            break;
+        }
+
+        case "WRONG_USERNAME":
+            JOptionPane.showMessageDialog(this, "Invalid User Username!");
+            loginAttempts++;
+            checkAttempts();
+            break;
+
+        case "WRONG_PASSWORD":
+            JOptionPane.showMessageDialog(this, "Incorrect Password!");
+            loginAttempts++;
+            checkAttempts();
+            break;
+
+        default:
+            JOptionPane.showMessageDialog(this, "Login Failed!");
+            loginAttempts++;
+            checkAttempts();
+    }
     }//GEN-LAST:event_jLoginButtonUserActionPerformed
 
     private void jUsernameTextFieldUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jUsernameTextFieldUserActionPerformed

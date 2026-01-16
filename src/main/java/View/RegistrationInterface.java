@@ -42,18 +42,21 @@ public class RegistrationInterface extends javax.swing.JFrame
         makeComboBoxDark(jMonthComboBox);
         makeComboBoxDark(jDayComboBox);
         makeComboBoxDark(jYearComboBox);
+        makeComboBoxDark(jRegistrationGenderComboBox);
 
         /* 2️⃣ Renderer (text colors for collapsed + popup) */
         jRegistrationRoleComboBox.setRenderer(darkComboRenderer);
         jMonthComboBox.setRenderer(darkComboRenderer);
         jDayComboBox.setRenderer(darkComboRenderer);
         jYearComboBox.setRenderer(darkComboRenderer);
+        jRegistrationGenderComboBox.setRenderer(darkComboRenderer);
 
         /* 3️⃣ Popup background ONLY */
         fixComboPopupColors(jRegistrationRoleComboBox);
         fixComboPopupColors(jMonthComboBox);
         fixComboPopupColors(jDayComboBox);
         fixComboPopupColors(jYearComboBox);
+        fixComboPopupColors(jRegistrationGenderComboBox);
         
         /* CheckBox Color */
         makeCheckBoxDark(jFirstPasswordCheckBox);
@@ -389,10 +392,10 @@ public class RegistrationInterface extends javax.swing.JFrame
                 hasInvalid = true;
             }
         }
-
-        // Role
-        if (jRegistrationRoleComboBox.getSelectedIndex() == 0) {
-            missing.append("• Role\n");
+        
+        // Gender
+        if (jRegistrationGenderComboBox.getSelectedIndex() == 0) {
+            missing.append("• Gender\n");
             hasMissing = true;
         }
         
@@ -484,7 +487,7 @@ public class RegistrationInterface extends javax.swing.JFrame
 
         JOptionPane.showMessageDialog(this, "Profile updated successfully");
 
-        new Interface().setVisible(true);
+        new AdminInterface().setVisible(true);
         dispose();
         return;
     }
@@ -523,17 +526,20 @@ public class RegistrationInterface extends javax.swing.JFrame
             );
             return;
         }
-        
+        String gender = jRegistrationGenderComboBox.getSelectedItem().toString();
+
         User user = new User(
             jUserNameTextField.getText().trim(),
             new String(jFirstPasswordTextField.getPassword()),
-            jRegistrationRoleComboBox.getSelectedItem().toString(),
+            "User", // 🔒 FORCE ROLE
             jFirstNameTextField.getText().trim(),
             jLastNameTextField.getText().trim(),
             (ImageIcon) jProfileImageLabel.getIcon(),
             LocalDate.now()
         );
-        
+
+        user.setGender(gender);
+
         AuthController.register(user);
         CurrentUser.set(user);
 
@@ -911,7 +917,7 @@ public class RegistrationInterface extends javax.swing.JFrame
         jConfirmPasswordTextField.setText("");
     }
 
-
+    
 
 
     @SuppressWarnings("unchecked")
@@ -953,6 +959,8 @@ public class RegistrationInterface extends javax.swing.JFrame
         jYearComboBox = new javax.swing.JComboBox<>();
         jProfileImageLabel = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jGenderPanel = new javax.swing.JPanel();
+        jRegistrationGenderComboBox = new javax.swing.JComboBox<>();
 
         jPasswordField1.setText("jPasswordField1");
 
@@ -1192,11 +1200,11 @@ public class RegistrationInterface extends javax.swing.JFrame
         jPanel12.setLayout(jPanel12Layout);
         jPanel12Layout.setHorizontalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
         );
         jPanel12Layout.setVerticalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
         );
 
         jPanel13.setBackground(new java.awt.Color(21, 20, 20));
@@ -1255,6 +1263,27 @@ public class RegistrationInterface extends javax.swing.JFrame
         jLabel4.setForeground(new java.awt.Color(170, 170, 170));
         jLabel4.setText("Profile Picture");
 
+        jGenderPanel.setBackground(new java.awt.Color(21, 20, 20));
+        jGenderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(170, 170, 170), 1, true), "Role", javax.swing.border.TitledBorder.RIGHT, javax.swing.border.TitledBorder.BOTTOM, new java.awt.Font("Iceberg", 0, 12), new java.awt.Color(170, 170, 170))); // NOI18N
+        jGenderPanel.setPreferredSize(new java.awt.Dimension(157, 50));
+
+        jRegistrationGenderComboBox.setBackground(new java.awt.Color(21, 20, 20));
+        jRegistrationGenderComboBox.setFont(new java.awt.Font("Iceberg", 0, 12)); // NOI18N
+        jRegistrationGenderComboBox.setForeground(new java.awt.Color(170, 170, 170));
+        jRegistrationGenderComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Choose your Gender", "Male", "Female" }));
+        jRegistrationGenderComboBox.setBorder(null);
+
+        javax.swing.GroupLayout jGenderPanelLayout = new javax.swing.GroupLayout(jGenderPanel);
+        jGenderPanel.setLayout(jGenderPanelLayout);
+        jGenderPanelLayout.setHorizontalGroup(
+            jGenderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jRegistrationGenderComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jGenderPanelLayout.setVerticalGroup(
+            jGenderPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jRegistrationGenderComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1277,7 +1306,8 @@ public class RegistrationInterface extends javax.swing.JFrame
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
-                    .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jGenderPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
@@ -1320,12 +1350,8 @@ public class RegistrationInterface extends javax.swing.JFrame
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jProfileImageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(16, 16, 16)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -1338,7 +1364,13 @@ public class RegistrationInterface extends javax.swing.JFrame
                         .addGap(7, 7, 7)
                         .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jConfirmPasswordCheckBox)))
+                        .addComponent(jConfirmPasswordCheckBox))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(17, 17, 17)
+                        .addComponent(jGenderPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGap(30, 30, 30)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jRegistrationButton, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1380,57 +1412,7 @@ public class RegistrationInterface extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
 
     private void jRegistrationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRegistrationButtonActionPerformed
-        String firstName = jFirstNameTextField.getText().trim();
-        String lastName  = jLastNameTextField.getText().trim();
-        String password  = new String(jFirstPasswordTextField.getPassword()).trim();
-
-        if (firstName.isEmpty() || lastName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "First and Last name required");
-            return;
-        }
-
-        // ================= EDIT MODE =================
-        if (editingUser != null) {
-
-            editingUser.setFirstName(firstName);
-            editingUser.setLastName(lastName);
-
-            if (!password.isEmpty()) {
-                editingUser.setPassword(password);
-            }
-
-            if (jProfileImageLabel.getIcon() != null) {
-                editingUser.setProfileImage(
-                    (ImageIcon) jProfileImageLabel.getIcon()
-                );
-            }
-
-            AuthController.saveUsers();   // 🔥 SAVE UPDATED USER
-
-            JOptionPane.showMessageDialog(this, "Profile updated successfully");
-
-            new Interface().setVisible(true);
-            dispose();
-            return;
-        }
-
-        // ================= NEW REGISTRATION =================
-        User newUser = new User(
-            jUserNameTextField.getText().trim(),
-            password,
-            "User",
-            firstName,
-            lastName,
-            (ImageIcon) jProfileImageLabel.getIcon(),
-            java.time.LocalDate.now()
-        );
-
-        AuthController.register(newUser);
-
-        JOptionPane.showMessageDialog(this, "Registration successful");
-
-        new LoginInterface().setVisible(true);
-        dispose();
+        confirmAndRegister();
     }//GEN-LAST:event_jRegistrationButtonActionPerformed
 
     private void jFirstNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFirstNameTextFieldActionPerformed
@@ -1513,6 +1495,7 @@ public class RegistrationInterface extends javax.swing.JFrame
     private javax.swing.JTextField jFirstNameTextField;
     private javax.swing.JCheckBox jFirstPasswordCheckBox;
     private javax.swing.JPasswordField jFirstPasswordTextField;
+    private javax.swing.JPanel jGenderPanel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -1535,6 +1518,7 @@ public class RegistrationInterface extends javax.swing.JFrame
     private javax.swing.JLabel jProfileImageLabel;
     private javax.swing.JButton jRegistrationBackButton;
     private javax.swing.JButton jRegistrationButton;
+    private javax.swing.JComboBox<String> jRegistrationGenderComboBox;
     private javax.swing.JComboBox<String> jRegistrationRoleComboBox;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jUserNameTextField;

@@ -30,6 +30,8 @@ public class User implements Serializable
     private String contactNumber;
     private String address;
     private String dob;
+    private String gender;
+
     
     public User(String username, String password, String role) 
     {
@@ -95,6 +97,9 @@ public class User implements Serializable
     public String getContactNumber() { return contactNumber; }
     public String getAddress() { return address; }
     public String getDob() { return dob; }
+        public String getGender() {
+        return gender;
+    }
     
     // ===== SETTERS =====
     public void setPassword(String password) 
@@ -124,4 +129,8 @@ public class User implements Serializable
     public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
     public void setAddress(String address) { this.address = address; }
     public void setDob(String dob) { this.dob = dob; }
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
 }
